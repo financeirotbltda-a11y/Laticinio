@@ -1,7 +1,3 @@
-https://raw.githubusercontent.com/financeirotbltda-a11y/Laticinio/main/index.html
-→ https://raw.githubusercontent.com/financeirotbltda-a11y/Laticinio/main/index.html
-Content-Type: text/plain; charset=utf-8
-
 <!DOCTYPE html>
 <!-- saved from url=(0050)https://financeirotbltda-a11y.github.io/Laticinio/ -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -1215,28 +1211,4 @@ function initRel() {
   if(!sm||!sa)return;
   const ano=new Date().getFullYear(),mes=new Date().getMonth();
   sm.innerHTML=MESES.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}"${i===mes?' selected':''}>${m}</option>`).join('');
-  sa.innerHTML=[ano,ano-1,ano-2].map(y=>`<option value="${y}"${y===ano?' selected':''}>${y}</option>`).join('');
-}
-function renderRel() {
-  const mes=document.getElementById('relMes').value,ano=document.getElementById('relAno').value;
-  const diaEl=document.getElementById('relDia'); const dia=diaEl?diaEl.value.trim():'';
-  const pref=`${ano}-${mes}`;
-  let mv=D.movimentacoes.filter(m=>{const d=m.dr||m.data.split('T')[0];return d.startsWith(pref)&&!m.exc;});
-  if(dia){const dd=String(parseInt(dia)).padStart(2,'0');mv=mv.filter(m=>(m.dr||m.data.split('T')[0]).endsWith('-'+dd));}
-  const vd=mv.filter(m=>m.tipo==='venda'),fd=mv.filter(m=>m.tipo==='fiado'&&m.recebido);
-  const dep=mv.filter(m=>m.tipo==='despesa');
-  const fatV=vd.reduce((s,m)=>s+(m.total||0),0);
-  const fatF=fd.reduce((s,m)=>s+(m.total||0),0);
-  const totD=dep.reduce((s,m)=>s+(m.valor||0),0);
-  const allMov=[...mv].filter(m=>['venda','fiado','deposito'].includes(m.tipo)).sort((a,b)=>b.data.localeCompare(a.data));
-  const badgesR={venda:'badge-venda',fiado:'badge-fiado',deposito:'badge-venda'};
-  const labelsR={venda:'Venda',fiado:'Fiado',deposito:'Depósito'};
-  document.getElementById('contRel').innerHTML=`
-    <div class="summary-cards" style="margin-top:16px">
-      <div class="sc verde"><label>Faturamento</label><div class="val">${rs(fatV)}</div></div>
-      <div class="sc amarelo"><label>Fiados Recebidos</label><div class="val">${rs(fatF)}</div></div>
-      <div class="sc vermelho"><label>Despesas</label><div class="val">${rs(totD)}</div></div>
-      <div class="sc verde"><label>Lucro Est.</label><div class="val">${rs(fatV+fatF-totD)}</div></div>
-    </div>
-    <h3 style="margin-top:20px;margin-bottom:10px;color:#1a3a5c;font-size:.95rem">📋 Movimentações${dia?' — Dia '+String(parseInt(dia)).padStart(2,'0')+'/'+mes+'/'+ano:' — '+MESES[parseInt(mes)-1]+'/'+ano}</h3>
-  
+  sa.innerHTML=[ano,ano-1,ano-2].map(y=>`<option value="${y}"${y===ano?
