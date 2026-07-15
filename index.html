@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)https://strong-sopapillas-acaeb4.netlify.app/ -->
+<!-- saved from url=(0050)https://financeirotbltda-a11y.github.io/Laticinio/ -->
 <html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,9 +84,9 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 <header>
   <div>
     <h1>🧀 Laticínio Three Brothers</h1>
-    <div class="sub" id="dataHoje">sexta-feira, 03 de julho de 2026</div>
+    <div class="sub" id="dataHoje">quarta-feira, 15 de julho de 2026</div>
   </div>
-  <div style="font-size:.85rem;color:rgba(255,255,255,.8)" id="statusFb"></div>
+  <div style="font-size:.85rem;color:rgba(255,255,255,.8)" id="statusFb">🔄 Sincronizando...</div>
 </header>
 
 <nav>
@@ -105,34 +105,27 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 </nav>
 
 <!-- PAINEL -->
-<div id="pg-dashboard" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbMovHoje','painel-hoje')">📥 Exportar Movimentos</button></div>
+<div id="pg-dashboard" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela(&#39;tbMovHoje&#39;,&#39;painel-hoje&#39;)">📥 Exportar Movimentos</button></div>
   <div class="summary-cards" id="cardsResumo">
-    <div class="sc verde"><label>Vendas Hoje</label><div class="val">R$ 8,00</div></div>
+    <div class="sc verde"><label>Vendas Hoje</label><div class="val">R$ 0,00</div></div>
     <div class="sc amarelo"><label>Fiados Hoje</label><div class="val">R$ 0,00</div></div>
-    <div class="sc vermelho"><label>Despesas</label><div class="val">R$ 75,00</div></div>
-    <div class="sc"><label>Saldo Caixa</label><div class="val">R$ -67,00</div></div></div>
+    <div class="sc vermelho"><label>Despesas</label><div class="val">R$ 0,00</div></div>
+    <div class="sc"><label>Saldo Caixa</label><div class="val">R$ 0,00</div></div></div>
   <div id="alertaEst"></div>
   <div class="card"><h2>🏆 Mais Vendidos — Mês Atual</h2><div id="rankingContent"><p style="color:#aaa;text-align:center;padding:12px">Sem vendas este mês</p></div></div>
   <div class="card"><h2>📋 Movimentações de Hoje</h2>
     <table><thead><tr><th>Hora</th><th>Tipo</th><th>Produto</th><th>Qtd/Valor</th><th>Pgto</th></tr></thead>
-    <tbody id="tbMovHoje"><tr>
-    <td>09:55</td><td><span class="badge badge-venda">venda</span></td>
-    <td>Natural 300</td>
-    <td>1 un</td>
-    <td>Dinheiro</td></tr><tr>
-    <td>08:01</td><td><span class="badge badge-despesa">despesa</span></td>
-    <td>Saco de Leite</td>
-    <td>R$ 75,00</td>
-    <td>Dinheiro</td></tr></tbody></table>
+    <tbody id="tbMovHoje"><tr><td colspan="5" style="text-align:center;color:#aaa">Sem movimentações hoje</td></tr></tbody></table>
   </div>
 </div>
 
 <!-- VENDAS -->
-<div id="pg-venda" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbVendas','vendas')">📥 Exportar CSV/Excel</button></div>
+<div id="pg-venda" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela(&#39;tbVendas&#39;,&#39;vendas&#39;)">📥 Exportar CSV/Excel</button></div>
   <div class="card"><h2>🛒 Lançar Venda</h2>
     <div class="form-row">
       <div class="form-group"><label>Produto</label><select id="vProd" onchange="vInfoProd()"><option value="">Selecione...</option><option value="1">Queijo Mussarela (kg)</option><option value="2">Queijo Coalho (kg)</option><option value="3">Queijo Manteiga (kg)</option><option value="4">Manteiga de Garrafa (un)</option><option value="6">Morango 500 (un)</option><option value="7">Natural 300 (un)</option><option value="8">Natural 500 (un)</option><option value="9">Ameixa  300 (un)</option><option value="10">Ameixa 500 (un)</option><option value="11">Queijo Trança (kg)</option><option value="24">Leite (L)</option><option value="25">Doce (un)</option><option value="26">Cartela de Ovos (un)</option><option value="27">Água Mineral (un)</option><option value="32">Morango 300 (un)</option></select><div id="vEstoqueInfo" style="font-size:.8rem;color:#2E75B6;margin-top:4px;font-weight:600"></div></div>
-      <div class="form-group" style="max-width:120px"><label>Quantidade</label><input type="number" id="vQtd" step="0.001" oninput="vPreview()"></div>
+      <div class="form-group" style="max-width:120px"><label id="vQtdLabel">Quantidade</label><input type="number" id="vQtd" step="0.001" oninput="vPreview()"></div>
+      <div class="form-group" style="max-width:110px;display:none" id="vQtdUnGrp"><label>Qtd (un/peças)</label><input type="number" id="vQtdUn" step="1" min="0" placeholder="Peças"></div>
       <div class="form-group" style="max-width:130px"><label>Valor Unit. R$</label><input type="number" id="vUnit" step="0.01" oninput="vPreview()"></div>
       <div class="form-group" style="max-width:120px"><label>Desconto R$</label><input type="number" id="vDesc" step="0.01" value="0" oninput="vPreview()"></div>
     </div>
@@ -143,11 +136,12 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
     </div>
     <div class="form-group"><label>Pagamento</label>
       <div class="pgto-btns" id="pgV">
+        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;À Vista&#39;,this)" data-val="À Vista">🤝 À Vista</button>
+        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Cartão&#39;,this)" data-val="Cartão">💳 Cartão</button>
         <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Dinheiro&#39;,this)" data-val="Dinheiro">💵 Dinheiro</button>
         <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;PIX&#39;,this)" data-val="PIX">📱 PIX</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Cartão&#39;,this)">💳 Cartão</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Misto&#39;,this)">🔀 Misto</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Fiado&#39;,this)">📝 Fiado</button>
+        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Misto&#39;,this)" data-val="Misto">🔀 Misto</button>
+        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Fiado&#39;,this)" data-val="Fiado">📝 Fiado</button>
       </div>
     </div>
     <div id="prevVenda" style="background: rgb(240, 244, 248); border-radius: 8px; padding: 10px; margin: 10px 0px; display: none;">Total: <strong style="color:#27ae60;font-size:1.1rem">R$ 8,00</strong></div>
@@ -168,6 +162,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 
 <!-- PRODUÇÃO -->
 <div id="pg-producao" class="page">
+  <div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbProd','producao')">📥 Exportar CSV/Excel</button></div>
   <div class="card"><h2>🏭 Entrada na Fábrica</h2>
     <div class="form-row">
       <div class="form-group"><label>Produto</label><select id="prProd"><option value="">Selecione...</option><option value="1">Queijo Mussarela (kg)</option><option value="2">Queijo Coalho (kg)</option><option value="3">Queijo Manteiga (kg)</option><option value="4">Manteiga de Garrafa (un)</option><option value="6">Morango 500 (un)</option><option value="7">Natural 300 (un)</option><option value="8">Natural 500 (un)</option><option value="9">Ameixa  300 (un)</option><option value="10">Ameixa 500 (un)</option><option value="11">Queijo Trança (kg)</option><option value="24">Leite (L)</option><option value="25">Doce (un)</option><option value="26">Cartela de Ovos (un)</option><option value="27">Água Mineral (un)</option><option value="32">Morango 300 (un)</option></select></div>
@@ -185,6 +180,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 
 <!-- TRANSFERÊNCIA -->
 <div id="pg-transferencia" class="page">
+  <div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbTransf','transferencias')">📥 Exportar CSV/Excel</button></div>
   <div class="card"><h2>🚚 Transferência Fábrica → Loja</h2>
     <div class="alerta">⚠️ Subtrai do estoque da <strong>Fábrica</strong> e soma no estoque da <strong>Loja</strong>.</div>
     <div class="form-row">
@@ -202,6 +198,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 
 <!-- DOAÇÕES -->
 <div id="pg-retirada" class="page">
+  <div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbRet','doacoes')">📥 Exportar CSV/Excel</button></div>
   <div class="card"><h2>🤝 Retirada / Doação</h2>
     <div class="form-row">
       <div class="form-group"><label>Produto</label><select id="retProd" onchange="retInfo()"><option value="">Selecione...</option><option value="1">Queijo Mussarela (kg)</option><option value="2">Queijo Coalho (kg)</option><option value="3">Queijo Manteiga (kg)</option><option value="4">Manteiga de Garrafa (un)</option><option value="6">Morango 500 (un)</option><option value="7">Natural 300 (un)</option><option value="8">Natural 500 (un)</option><option value="9">Ameixa  300 (un)</option><option value="10">Ameixa 500 (un)</option><option value="11">Queijo Trança (kg)</option><option value="24">Leite (L)</option><option value="25">Doce (un)</option><option value="26">Cartela de Ovos (un)</option><option value="27">Água Mineral (un)</option><option value="32">Morango 300 (un)</option></select></div>
@@ -220,7 +217,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 </div>
 
 <!-- CAIXA -->
-<div id="pg-caixa" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbCaixa','caixa')">📥 Exportar CSV/Excel</button></div>
+<div id="pg-caixa" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela(&#39;tbCaixa&#39;,&#39;caixa&#39;)">📥 Exportar CSV/Excel</button></div>
   <div class="card">
     <h2>💰 Resumo do Caixa</h2>
     <div class="filtros" style="margin-bottom:14px">
@@ -275,7 +272,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 </div>
 
 <!-- FIADOS -->
-<div id="pg-fiado" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbFiados','fiados')">📥 Exportar CSV/Excel</button></div>
+<div id="pg-fiado" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela(&#39;tbFiados&#39;,&#39;fiados&#39;)">📥 Exportar CSV/Excel</button></div>
   <div class="card"><h2>📝 Fiados Pendentes</h2>
     <table><thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Valor</th><th>Ação</th></tr></thead>
     <tbody id="tbFiados"><tr><td colspan="6" style="text-align:center;color:#aaa">Nenhum fiado pendente</td></tr></tbody></table>
@@ -284,6 +281,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 
 <!-- ESTOQUE -->
 <div id="pg-estoque" class="page active">
+  <div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbEst','estoque')">📥 Exportar CSV/Excel</button></div>
   <div class="card"><h2>📦 Estoque Atual</h2>
     <table><thead><tr><th>Produto</th><th>Un</th><th>Est. Fábrica</th><th>Est. Loja</th><th>Total</th><th>Mín.</th></tr></thead>
     <tbody id="tbEst"><tr style="background:#fff3cd"><td>Queijo Mussarela</td><td>kg</td>
@@ -337,7 +335,8 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
     <div class="form-row">
       <div class="form-group"><label>Produto</label><select id="ajProd"><option value="">Selecione...</option><option value="1">Queijo Mussarela (kg)</option><option value="2">Queijo Coalho (kg)</option><option value="3">Queijo Manteiga (kg)</option><option value="4">Manteiga de Garrafa (un)</option><option value="6">Morango 500 (un)</option><option value="7">Natural 300 (un)</option><option value="8">Natural 500 (un)</option><option value="9">Ameixa  300 (un)</option><option value="10">Ameixa 500 (un)</option><option value="11">Queijo Trança (kg)</option><option value="24">Leite (L)</option><option value="25">Doce (un)</option><option value="26">Cartela de Ovos (un)</option><option value="27">Água Mineral (un)</option><option value="32">Morango 300 (un)</option></select></div>
       <div class="form-group" style="max-width:120px"><label>Local</label><select id="ajLocal"><option value="fabrica">Fábrica</option><option value="loja">Loja</option></select></div>
-      <div class="form-group" style="max-width:130px"><label>Novo Estoque</label><input type="number" id="ajQtd" step="0.001"></div>
+      <div class="form-group" style="max-width:130px"><label>Novo Estoque (kg)</label><input type="number" id="ajQtd" step="0.001"></div>
+      <div class="form-group" style="max-width:130px"><label>Qtd un (peças)</label><input type="number" id="ajQtdUn" step="1" placeholder="Só queijos"></div>
       <div class="form-group"><label>Motivo</label><input type="text" id="ajMotivo" placeholder="Ex: Inventário"></div>
     </div>
     <button class="btn btn-primary" onclick="ajustarEst()">💾 Salvar Ajuste</button>
@@ -345,7 +344,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 </div>
 
 <!-- RELATÓRIO -->
-<div id="pg-relatorio" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tblRelatorio','relatorio-mensal')">📥 Exportar CSV/Excel</button></div>
+<div id="pg-relatorio" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela(&#39;tblRelatorio&#39;,&#39;relatorio-mensal&#39;)">📥 Exportar CSV/Excel</button></div>
   <div class="card"><h2>📊 Relatório Mensal</h2>
     <div class="form-row">
       <div class="form-group" style="max-width:160px"><label>Mês</label><select id="relMes"><option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option><option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option><option value="07" selected="">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select></div>
@@ -364,7 +363,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 </div>
 
 <!-- HISTÓRICO -->
-<div id="pg-historico" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbHist','historico')">📥 Exportar CSV/Excel</button></div>
+<div id="pg-historico" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela(&#39;tbHist&#39;,&#39;historico&#39;)">📥 Exportar CSV/Excel</button></div>
   <div class="card"><h2>📋 Histórico de Movimentações</h2>
     <div class="filtros">
       <div class="form-group"><label>Tipo</label>
@@ -406,7 +405,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 </div>
 
 <!-- PRODUTOS -->
-<div id="pg-produtos" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela('tbProds','produtos')">📥 Exportar CSV/Excel</button></div>
+<div id="pg-produtos" class="page"><div class="toolbar-export"><button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button><button class="btn-export-csv" onclick="exportarTabela(&#39;tbProds&#39;,&#39;produtos&#39;)">📥 Exportar CSV/Excel</button></div>
   <div class="card"><h2>🧀 Cadastrar Produto</h2>
     <div class="form-row">
       <div class="form-group"><label>Nome</label><input type="text" id="pNome" placeholder="Ex: Queijo Coalho"></div>
@@ -709,7 +708,16 @@ function vInfoProd() {
   const p=prod(document.getElementById('vProd').value);
   if(p&&p.preco) document.getElementById('vUnit').value=p.preco;
   const infoEl=document.getElementById('vEstoqueInfo');
-  if(infoEl) infoEl.textContent=p?`📦 Estoque disponível (Loja): ${p.loja||0} ${p.un}`:'';
+  const isQ=p&&(p.nome||'').toLowerCase().includes('queijo');
+  if(infoEl){
+    if(isQ) infoEl.innerHTML=`📦 Estoque Loja: <strong>${p.loja||0} kg</strong> | <strong>${p.lojaUn||0} un</strong>`;
+    else infoEl.textContent=p?`📦 Estoque disponível (Loja): ${p.loja||0} ${p.un}`:'';
+  }
+  const qtdUnGrp=document.getElementById('vQtdUnGrp');
+  const qtdLabel=document.getElementById('vQtdLabel');
+  if(qtdUnGrp) qtdUnGrp.style.display=isQ?'':'none';
+  if(qtdLabel) qtdLabel.textContent=isQ?'Peso (kg)':'Quantidade';
+  if(!isQ&&document.getElementById('vQtdUn')) document.getElementById('vQtdUn').value='';
   vPreview();
 }
 function vPreview() {
@@ -720,10 +728,13 @@ function vPreview() {
   const pId=document.getElementById('vProd').value;
   const p=prod(pId);
   const nomeP=p?(p.nome||'').toLowerCase():'';
-  if(nomeP.includes('queijo')) tot=Math.floor(tot);
+  const isQ=nomeP.includes('queijo');
+  if(isQ) tot=Math.floor(tot);
   const el=document.getElementById('prevVenda');
   el.style.display=qtd>0&&unit>0?'block':'none';
-  el.innerHTML=`Total: <strong style="color:#27ae60;font-size:1.1rem">${rs(tot)}</strong>${nomeP.includes('queijo')?'<span style="font-size:.75rem;color:#888;margin-left:8px">(arredondado para baixo)</span>':''}`;
+  const qtdUn=parseInt((document.getElementById('vQtdUn')||{}).value)||0;
+  const unExtra=isQ&&qtdUn>0?` <span style="font-size:.8rem;color:#555;margin-left:8px">(${qtdUn} peça${qtdUn!==1?'s':''})</span>`:'';
+  el.innerHTML=`Total: <strong style="color:#27ae60;font-size:1.1rem">${rs(tot)}</strong>${isQ?'<span style="font-size:.75rem;color:#888;margin-left:8px">(arredondado para baixo)</span>':''}${unExtra}`;
 }
 function lancarVenda() {
   try {
@@ -735,6 +746,7 @@ function lancarVenda() {
     const cli=document.getElementById('vCliente').value.trim();
     const obs=document.getElementById('vObs').value.trim();
     const vData=document.getElementById('vData')?document.getElementById('vData').value||hoje():hoje();
+    const qtdUn=parseInt((document.getElementById('vQtdUn')||{}).value)||0;
     if(!pId){toast('Selecione um produto!','erro');return;}
     if(!qtd||qtd<=0){toast('Informe a quantidade!','erro');return;}
     if(!unit||unit<=0){toast('Informe o valor unitário!','erro');return;}
@@ -749,9 +761,12 @@ function lancarVenda() {
     if(nomeP.includes('queijo')) total=Math.floor(total);
     const tipo=pgto==='Fiado'?'fiado':'venda';
     if(!D.movimentacoes) D.movimentacoes=[];
-    D.movimentacoes.push({id:nid(),tipo,data:new Date().toISOString(),dr:vData,
-      pId:p.id,pNome:p.nome,un:p.un,qtd,unit,desc,total,pgto,cli,obs});
+    const mov={id:nid(),tipo,data:new Date().toISOString(),dr:vData,
+      pId:p.id,pNome:p.nome,un:p.un,qtd,unit,desc,total,pgto,cli,obs};
+    if(nomeP.includes('queijo')&&qtdUn>0){mov.qtdUn=qtdUn;}
+    D.movimentacoes.push(mov);
     p.loja=Math.round((p.loja-qtd)*1000)/1000;
+    if(nomeP.includes('queijo')&&qtdUn>0) p.lojaUn=Math.max(0,(p.lojaUn||0)-qtdUn);
     save();
     toast(tipo==='fiado'?'📝 Fiado registrado!':'✅ Venda lançada!');
     limparVenda();
@@ -767,6 +782,12 @@ function limparVenda() {
   document.getElementById('vDesc').value='0';
   document.getElementById('prevVenda').style.display='none';
   document.querySelectorAll('#pgV .pgto-btn').forEach(b=>b.classList.remove('sel'));
+  const quGrp=document.getElementById('vQtdUnGrp');
+  if(quGrp) quGrp.style.display='none';
+  const quEl=document.getElementById('vQtdUn');
+  if(quEl) quEl.value='';
+  const lbl=document.getElementById('vQtdLabel');
+  if(lbl) lbl.textContent='Quantidade';
 }
 function renderVendas() {
   const lista=D.movimentacoes.filter(m=>(m.tipo==='venda'||m.tipo==='fiado')&&(m.dr||m.data.split('T')[0])===hoje()&&!m.exc).reverse();
@@ -912,6 +933,7 @@ function renderCaixa() {
   const fatDin=vendasMv.filter(m=>m.pgto==='Dinheiro').reduce((s,m)=>s+(m.total||0),0);
   const fatCart=vendasMv.filter(m=>m.pgto==='Cartão').reduce((s,m)=>s+(m.total||0),0);
   const fatMisto=vendasMv.filter(m=>m.pgto==='Misto').reduce((s,m)=>s+(m.total||0),0);
+  const fatAVista=vendasMv.filter(m=>m.pgto==='À Vista').reduce((s,m)=>s+(m.total||0),0);
   const fatFiado=mv.filter(m=>m.tipo==='fiado'&&!m.recebido).reduce((s,m)=>s+(m.total||0),0);
   const totD=mv.filter(m=>m.tipo==='despesa').reduce((s,m)=>s+(m.valor||0),0);
   const totR=mv.filter(m=>m.tipo==='retiradaCaixa').reduce((s,m)=>s+(m.valor||0),0);
@@ -924,9 +946,10 @@ function renderCaixa() {
     <div class="sc"><label>Depósitos</label><div class="val">${rs(totDep)}</div></div>
     <div class="sc amarelo"><label>Saldo</label><div class="val">${rs(fatV-totD-totR)}</div></div>`;
   if(document.getElementById('resCaixaPgto')) document.getElementById('resCaixaPgto').innerHTML=`
+    <div class="sc verde"><label>🤝 À Vista</label><div class="val" style="font-size:1.1rem">${rs(fatAVista)}</div></div>
+    <div class="sc verde"><label>💳 Cartão</label><div class="val" style="font-size:1.1rem">${rs(fatCart)}</div></div>
     <div class="sc verde"><label>💵 Dinheiro</label><div class="val" style="font-size:1.1rem">${rs(fatDin)}</div></div>
     <div class="sc verde"><label>📱 PIX</label><div class="val" style="font-size:1.1rem">${rs(fatPix)}</div></div>
-    <div class="sc verde"><label>💳 Cartão</label><div class="val" style="font-size:1.1rem">${rs(fatCart)}</div></div>
     <div class="sc verde"><label>🔀 Misto</label><div class="val" style="font-size:1.1rem">${rs(fatMisto)}</div></div>
     <div class="sc amarelo"><label>📝 Fiados (pendente)</label><div class="val" style="font-size:1.1rem">${rs(fatFiado)}</div></div>`;
   const lista=mv.filter(m=>['despesa','retiradaCaixa','deposito','retornoLeite'].includes(m.tipo)).reverse();
@@ -967,10 +990,18 @@ function renderEst() {
   document.getElementById('tbEst').innerHTML=D.produtos.map(p=>{
     const tot=(p.fab||0)+(p.loja||0);
     const al=p.min>0&&tot<p.min?' style="background:#fff3cd"':'';
+    const isQ=(p.nome||'').toLowerCase().includes('queijo');
+    const fabCell=isQ
+      ?`<span class="est-fab">${p.fab||0} kg</span><br><small style="color:#555;font-size:.75rem">${p.fabUn||0} un</small>`
+      :`<span class="est-fab">${p.fab||0}</span>`;
+    const lojaCell=isQ
+      ?`<span class="est-loja">${p.loja||0} kg</span><br><small style="color:#555;font-size:.75rem">${p.lojaUn||0} un</small>`
+      :`<span class="est-loja">${p.loja||0}</span>`;
+    const totCell=isQ?`<strong>${tot} kg</strong><br><small style="color:#555;font-size:.75rem">${(p.fabUn||0)+(p.lojaUn||0)} un</small>`:`<strong>${tot}</strong>`;
     return `<tr${al}><td>${p.nome}</td><td>${p.un}</td>
-      <td><span class="est-fab">${p.fab||0}</span></td>
-      <td><span class="est-loja">${p.loja||0}</span></td>
-      <td><strong>${tot}</strong></td><td>${p.min||0}</td></tr>`;
+      <td>${fabCell}</td>
+      <td>${lojaCell}</td>
+      <td>${totCell}</td><td>${p.min||0}</td></tr>`;
   }).join('')||'<tr><td colspan="6" style="text-align:center;color:#aaa">Nenhum produto</td></tr>';
 }
 function lancarRetornoLeite() {
@@ -1000,13 +1031,17 @@ function ajustarEst() {
   const pId=document.getElementById('ajProd').value;
   const local=document.getElementById('ajLocal').value;
   const qtd=parseFloat(document.getElementById('ajQtd').value);
+  const qtdUn=parseInt(document.getElementById('ajQtdUn').value);
   const motivo=document.getElementById('ajMotivo').value.trim();
   if(!pId||isNaN(qtd)){toast('Preencha todos os campos!','erro');return;}
   const p=prod(pId);
   const campo=local==='fabrica'?'fab':'loja';
+  const campoUn=local==='fabrica'?'fabUn':'lojaUn';
   p[campo]=qtd;
-  D.movimentacoes.push({id:nid(),tipo:'ajusteEstoque',data:new Date().toISOString(),dr:hoje(),pNome:p.nome,un:p.un,local,qtd,motivo});
+  if(!isNaN(qtdUn)&&document.getElementById('ajQtdUn').value!=='') p[campoUn]=qtdUn;
+  D.movimentacoes.push({id:nid(),tipo:'ajusteEstoque',data:new Date().toISOString(),dr:hoje(),pNome:p.nome,un:p.un,local,qtd,qtdUn:isNaN(qtdUn)?undefined:qtdUn,motivo});
   save(); toast('✅ Estoque ajustado!'); renderEst();
+  document.getElementById('ajQtdUn').value='';
 }
 
 // =================== PRODUTOS ===================
@@ -1459,15 +1494,13 @@ setTimeout(()=>{
         <select id="lcMes" onchange="renderLeiteCtrl()" style="padding:6px 10px;border-radius:8px;border:1px solid #ccc;font-size:.9rem">
           <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
           <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
-          <option value="07" selected>Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+          <option value="07" selected="">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
           <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
         </select>
         <select id="lcAno" onchange="renderLeiteCtrl()" style="padding:6px 10px;border-radius:8px;border:1px solid #ccc;font-size:.9rem">
-          <option value="2026" selected>2026</option><option value="2025">2025</option><option value="2027">2027</option>
+          <option value="2026" selected="">2026</option><option value="2025">2025</option><option value="2027">2027</option>
         </select>
-        <input type="number" id="lcPrecoDefault" value="6" step="0.01" placeholder="Preço/L padrão"
-          style="width:120px;padding:6px 10px;border-radius:8px;border:1px solid #ccc;font-size:.9rem"
-          title="Preço por litro padrão para novos lançamentos" onchange="renderLeiteCtrl()">
+        <input type="number" id="lcPrecoDefault" value="6" step="0.01" placeholder="Preço/L padrão" style="width:120px;padding:6px 10px;border-radius:8px;border:1px solid #ccc;font-size:.9rem" title="Preço por litro padrão para novos lançamentos" onchange="renderLeiteCtrl()">
         <span style="align-self:center;font-size:.8rem;color:#888">R$/L padrão</span>
       </div>
     </div>
@@ -1522,11 +1555,12 @@ setTimeout(()=>{
     </div>
     <div class="form-group" style="margin-bottom:12px"><label>Pagamento</label>
       <div class="pgto-btns" id="pgEditV">
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Dinheiro&#39;,this)">💵 Dinheiro</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;PIX&#39;,this)">📱 PIX</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Cartão&#39;,this)">💳 Cartão</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Misto&#39;,this)">🔀 Misto</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Fiado&#39;,this)">📝 Fiado</button>
+        <button class="pgto-btn" data-val="À Vista" onclick="spgto(&#39;pgEditV&#39;,&#39;À Vista&#39;,this)">🤝 À Vista</button>
+        <button class="pgto-btn" data-val="Cartão" onclick="spgto(&#39;pgEditV&#39;,&#39;Cartão&#39;,this)">💳 Cartão</button>
+        <button class="pgto-btn" data-val="Dinheiro" onclick="spgto(&#39;pgEditV&#39;,&#39;Dinheiro&#39;,this)">💵 Dinheiro</button>
+        <button class="pgto-btn" data-val="PIX" onclick="spgto(&#39;pgEditV&#39;,&#39;PIX&#39;,this)">📱 PIX</button>
+        <button class="pgto-btn" data-val="Misto" onclick="spgto(&#39;pgEditV&#39;,&#39;Misto&#39;,this)">🔀 Misto</button>
+        <button class="pgto-btn" data-val="Fiado" onclick="spgto(&#39;pgEditV&#39;,&#39;Fiado&#39;,this)">📝 Fiado</button>
       </div>
     </div>
     <div style="display:flex;gap:8px">
