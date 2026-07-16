@@ -609,7 +609,7 @@ function load() {
 function save() {
   lastSave = Date.now();
   localStorage.setItem(SK, JSON.stringify(D));
-  setTimeout(()=>{ try{ db.ref('ltbv2').set(D); }catch(e){} }, 100);
+  setTimeout(()=>{ try{ db.ref('ltbv2').set(D).catch(e=>{}); }catch(e){} }, 100);
 }
 function nid() { 
   if(!D.nid) D.nid=1; 
@@ -1211,4 +1211,386 @@ function initRel() {
   if(!sm||!sa)return;
   const ano=new Date().getFullYear(),mes=new Date().getMonth();
   sm.innerHTML=MESES.map((m,i)=>`<option value="${String(i+1).padStart(2,'0')}"${i===mes?' selected':''}>${m}</option>`).join('');
-  sa.innerHTML=[ano,ano-1,ano-2].map(y=>`<option value="${y}"${y===ano?
+  sa.innerHTML=[ano,ano-1,ano-2].map(y=>`<option value="${y}"${y===ano?' selected':''}>${y}</option>`).join('');
+}
+function renderRel() {
+  const mes=document.getElementById('relMes').value,ano=document.getElementById('relAno').value;
+  const diaEl=document.getElementById('relDia'); const dia=diaEl?diaEl.value.trim():'';
+  const pref=`${ano}-${mes}`;
+  let mv=D.movimentacoes.filter(m=>{const d=m.dr||m.data.split('T')[0];return d.startsWith(pref)&&!m.exc;});
+  if(dia){const dd=String(parseInt(dia)).padStart(2,'0');mv=mv.filter(m=>(m.dr||m.data.split('T')[0]).endsWith('-'+dd));}
+  const vd=mv.filter(m=>m.tipo==='venda'),fd=mv.filter(m=>m.tipo==='fiado'&&m.recebido);
+  const dep=mv.filter(m=>m.tipo==='despesa');
+  const fatV=vd.reduce((s,m)=>s+(m.total||0),0);
+  const fatF=fd.reduce((s,m)=>s+(m.total||0),0);
+  const totD=dep.reduce((s,m)=>s+(m.valor||0),0);
+  const allMov=[...mv].filter(m=>['venda','fiado','deposito'].includes(m.tipo)).sort((a,b)=>b.data.localeCompare(a.data));
+  const badgesR={venda:'badge-venda',fiado:'badge-fiado',deposito:'badge-venda'};
+  const labelsR={venda:'Venda',fiado:'Fiado',deposito:'Depósito'};
+  document.getElementById('contRel').innerHTML=`
+    <div class="summary-cards" style="margin-top:16px">
+      <div class="sc verde"><label>Faturamento</label><div class="val">${rs(fatV)}</div></div>
+      <div class="sc amarelo"><label>Fiados Recebidos</label><div class="val">${rs(fatF)}</div></div>
+      <div class="sc vermelho"><label>Despesas</label><div class="val">${rs(totD)}</div></div>
+      <div class="sc verde"><label>Lucro Est.</label><div class="val">${rs(fatV+fatF-totD)}</div></div>
+    </div>
+    <h3 style="margin-top:20px;margin-bottom:10px;color:#1a3a5c;font-size:.95rem">📋 Movimentações${dia?' — Dia '+String(parseInt(dia)).padStart(2,'0')+'/'+mes+'/'+ano:' — '+MESES[parseInt(mes)-1]+'/'+ano}</h3>
+    <div style="overflow-x:auto">
+    <table id="tblRelatorio"><thead><tr><th>Data</th><th>Tipo</th><th>Produto/Descrição</th><th>Qtd</th><th>Valor</th><th>Pagamento</th><th>Cliente/OBS</th></tr></thead>
+    <tbody>${allMov.length?allMov.map(m=>`<tr>
+      <td>${m.dr||m.data.split('T')[0]}</td>
+      <td><span class="badge ${badgesR[m.tipo]||''}">${labelsR[m.tipo]||m.tipo}</span></td>
+      <td>${m.pNome||m.desc||'—'}</td>
+      <td>${m.qtd?m.qtd+' '+(m.un||''):'—'}</td>
+      <td>${m.total?rs(m.total):m.valor?rs(m.valor):'—'}</td>
+      <td>${m.pgto||'—'}</td>
+      <td>${m.cli||m.obs||'—'}</td></tr>`).join(''):'<tr><td colspan="7" style="text-align:center;color:#aaa">Sem movimentações</td></tr>'}</tbody>
+    </table></div>`;
+}
+
+// =================== CONTROLE DE LEITE ===================
+const MESES_LC=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+function diasNoMes(ano,mes){return new Date(parseInt(ano),parseInt(mes),0).getDate();}
+function lcKey(ano,mes){return ano+'-'+mes;}
+function lcGetDia(ano,mes,dia){
+  if(!D.leiteCtrl)D.leiteCtrl={};
+  const k=lcKey(ano,mes);
+  if(!D.leiteCtrl[k])D.leiteCtrl[k]={};
+  if(!D.leiteCtrl[k][dia])D.leiteCtrl[k][dia]={manha:0,tarde:0,destMFab:0,destMBez:0,destTFab:0,destTBez:0,retLoja:0,retFab:0,qtdVend:0,qtdRet:0,preco:0};
+  return D.leiteCtrl[k][dia];
+}
+function lcCalc(d){
+  const tl=parseFloat(d.manha||0)+parseFloat(d.tarde||0);
+  const td=tl+parseFloat(d.destMFab||0)+parseFloat(d.destMBez||0)+parseFloat(d.destTFab||0)+parseFloat(d.destTBez||0);
+  const val=parseFloat(d.qtdVend||0)*parseFloat(d.preco||0);
+  return {tl:Math.round(tl*1000)/1000, td:Math.round(td*1000)/1000, val:Math.round(val*100)/100};
+}
+function lcInput(ano,mes,diaStr,campo,el){
+  if(!D.leiteCtrl)D.leiteCtrl={};
+  const k=lcKey(ano,mes);
+  if(!D.leiteCtrl[k])D.leiteCtrl[k]={};
+  if(!D.leiteCtrl[k][diaStr])D.leiteCtrl[k][diaStr]={manha:0,tarde:0,destMFab:0,destMBez:0,destTFab:0,destTBez:0,retLoja:0,retFab:0,qtdVend:0,qtdRet:0,preco:parseFloat(document.getElementById('lcPrecoDefault').value)||6};
+  D.leiteCtrl[k][diaStr][campo]=parseFloat(el.value)||0;
+  const d=D.leiteCtrl[k][diaStr];
+  const {tl,td,val}=lcCalc(d);
+  const row=document.getElementById('lcRow_'+diaStr);
+  if(row){
+    row.querySelector('.lcTL').textContent=tl||'-';
+    row.querySelector('.lcTD').textContent=td||'-';
+    row.querySelector('.lcVal').textContent=val?rs(val):'-';
+  }
+  lcUpdateTotais(ano,mes);
+  save();
+}
+function lcUpdateTotais(ano,mes){
+  const k=lcKey(ano,mes);
+  const data=D.leiteCtrl&&D.leiteCtrl[k]?D.leiteCtrl[k]:{};
+  const T={manha:0,tarde:0,tl:0,destMFab:0,destMBez:0,destTFab:0,destTBez:0,retLoja:0,retFab:0,td:0,qtdVend:0,qtdRet:0,val:0};
+  Object.values(data).forEach(d=>{
+    T.manha+=parseFloat(d.manha||0);T.tarde+=parseFloat(d.tarde||0);
+    const{tl,td,val}=lcCalc(d);
+    T.tl+=tl;T.destMFab+=parseFloat(d.destMFab||0);T.destMBez+=parseFloat(d.destMBez||0);
+    T.destTFab+=parseFloat(d.destTFab||0);T.destTBez+=parseFloat(d.destTBez||0);
+    T.retLoja+=parseFloat(d.retLoja||0);T.retFab+=parseFloat(d.retFab||0);
+    T.td+=td;T.qtdVend+=parseFloat(d.qtdVend||0);T.qtdRet+=parseFloat(d.qtdRet||0);T.val+=val;
+  });
+  const f=v=>v?Math.round(v*1000)/1000+' L':'-';
+  const fv=v=>v?rs(Math.round(v*100)/100):'-';
+  document.getElementById('tfootLeite').innerHTML=`<tr style="background:#1a3a5c;color:#fff;font-weight:700">
+    <td style="padding:6px 8px;border:1px solid #2c4f7c">TOTAL DO MÊS</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.manha)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.tarde)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center;background:#c8a000">${f(T.tl)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.destMFab)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.destMBez)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.destTFab)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.destTBez)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.retLoja)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.retFab)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center;background:#c8a000">${f(T.td)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.qtdVend)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">${f(T.qtdRet)}</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center">-</td>
+    <td style="padding:6px 8px;border:1px solid #2c4f7c;text-align:center;background:#155a2e">${fv(T.val)}</td>
+  </tr>`;
+}
+function inp(tipo,ano,mes,diaStr,campo,val){
+  const style='width:52px;text-align:center;border:none;background:transparent;font-size:.78rem;padding:2px;color:inherit';
+  return `<input type="number" step="0.001" min="0" value="${val||''}" placeholder="-"
+    style="${style}" oninput="lcInput('${ano}','${mes}','${diaStr}','${campo}',this)">`;
+}
+function renderLeiteCtrl(){
+  if(!D.leiteCtrl)D.leiteCtrl={};
+  const mes=document.getElementById('lcMes').value;
+  const ano=document.getElementById('lcAno').value;
+  const precoPad=parseFloat(document.getElementById('lcPrecoDefault').value)||6;
+  const nDias=diasNoMes(ano,mes);
+  const k=lcKey(ano,mes);
+  const mNome=MESES_LC[parseInt(mes)-1];
+  document.getElementById('lcTitulo').textContent='CONTROLE DE LEITE - '+mNome.toUpperCase()+' DE '+ano;
+  const tbody=document.getElementById('tbodyLeite');
+  let rows='';
+  for(let i=1;i<=nDias;i++){
+    const dStr=String(i).padStart(2,'0');
+    const dt=new Date(parseInt(ano),parseInt(mes)-1,i);
+    const dtLabel=dStr+'/'+(mes)+'/'+ano;
+    const d=(D.leiteCtrl[k]&&D.leiteCtrl[k][dStr])?D.leiteCtrl[k][dStr]:{manha:0,tarde:0,destMFab:0,destMBez:0,destTFab:0,destTBez:0,retLoja:0,retFab:0,qtdVend:0,qtdRet:0,preco:precoPad};
+    const{tl,td,val}=lcCalc(d);
+    const alt=i%2===0?'background:#f0f4f8':'background:#fff';
+    rows+=`<tr id="lcRow_${dStr}" style="${alt}">
+      <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;font-size:.78rem;color:#333;white-space:nowrap">${dtLabel}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'manha',d.manha)}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'tarde',d.tarde)}</td>
+      <td class="lcTL" style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-weight:700;background:#e8f0fe;color:#1a3a5c">${tl||'-'}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'destMFab',d.destMFab)}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'destMBez',d.destMBez)}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'destTFab',d.destTFab)}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'destTBez',d.destTBez)}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'retLoja',d.retLoja)}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'retFab',d.retFab)}</td>
+      <td class="lcTD" style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-weight:700;background:#fff3cd;color:#856404">${td||'-'}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'qtdVend',d.qtdVend)}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'qtdRet',d.qtdRet)}</td>
+      <td style="padding:2px 4px;border:1px solid #ddd;text-align:center">${inp('n',ano,mes,dStr,'preco',d.preco||precoPad)}</td>
+      <td class="lcVal" style="padding:4px 6px;border:1px solid #ddd;text-align:center;font-weight:700;color:#155a2e;background:#d4edda">${val?rs(val):'-'}</td>
+    </tr>`;
+  }
+  tbody.innerHTML=rows;
+  lcUpdateTotais(ano,mes);
+}
+function exportarTabelaLeite(){
+  const t=document.getElementById('tblLeiteCtrl');
+  if(!t){toast('Nada para exportar','erro');return;}
+  let csv='\uFEFF';
+  for(const row of t.rows){
+    const cols=[];
+    for(const cell of row.cells){
+      const inp=cell.querySelector('input');
+      cols.push('"'+(inp?inp.value:cell.innerText).replace(/"/g,'""')+'"');
+    }
+    csv+=cols.join(';')+'\n';
+  }
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  const mes=document.getElementById('lcMes').value,ano=document.getElementById('lcAno').value;
+  a.download='controle-leite-'+mes+'-'+ano+'.csv';a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ Exportado!');
+}
+
+// =================== EDITAR VENDA ===================
+function abrirEditVenda(id){
+  const m=D.movimentacoes.find(x=>x.id===id); if(!m)return;
+  document.getElementById('editVendaId').value=id;
+  document.getElementById('editVQtd').value=m.qtd||0;
+  document.getElementById('editVUnit').value=m.unit||0;
+  document.getElementById('editVDesc').value=m.desc||0;
+  document.getElementById('editVCli').value=m.cli||'';
+  document.getElementById('editVData').value=m.dr||m.data.split('T')[0];
+  document.querySelectorAll('#pgEditV .pgto-btn').forEach(b=>b.classList.remove('sel'));
+  const pgtoBtn=document.querySelector(`#pgEditV [data-val="${m.pgto}"]`);
+  if(pgtoBtn)pgtoBtn.classList.add('sel');
+  editVPreview();
+  document.getElementById('modalEditVenda').classList.add('open');
+}
+function fecharEditVenda(){document.getElementById('modalEditVenda').classList.remove('open');}
+function editVPreview(){
+  const qtd=parseFloat(document.getElementById('editVQtd').value)||0;
+  const unit=parseFloat(document.getElementById('editVUnit').value)||0;
+  const desc=parseFloat(document.getElementById('editVDesc').value)||0;
+  const tot=Math.max(0,qtd*unit-desc);
+  const div=document.getElementById('editVPreviewDiv');
+  div.style.display=qtd>0&&unit>0?'block':'none';
+  div.querySelector('strong').textContent=rs(tot);
+}
+function salvarEditVenda(){
+  try{
+    const id=parseInt(document.getElementById('editVendaId').value);
+    const m=D.movimentacoes.find(x=>x.id===id); if(!m){toast('Não encontrado','erro');return;}
+    const qtdNova=parseFloat(document.getElementById('editVQtd').value)||0;
+    const unitNova=parseFloat(document.getElementById('editVUnit').value)||0;
+    const descNova=parseFloat(document.getElementById('editVDesc').value)||0;
+    const pgtoNovo=gpgto('pgEditV')||m.pgto;
+    const cliNovo=document.getElementById('editVCli').value.trim();
+    const dataNova=document.getElementById('editVData').value||m.dr;
+    const p=m.pId?prod(m.pId):null;
+    if(p){const diff=qtdNova-(m.qtd||0);p.loja=Math.max(0,Math.round(((p.loja||0)-diff)*1000)/1000);}
+    m.qtd=qtdNova;m.unit=unitNova;m.desc=descNova;
+    m.total=Math.max(0,qtdNova*unitNova-descNova);
+    m.pgto=pgtoNovo;m.cli=cliNovo;m.dr=dataNova;
+    m.tipo=pgtoNovo==='Fiado'?'fiado':'venda';
+    save(); toast('✅ Venda atualizada!'); fecharEditVenda(); renderVendas();
+  }catch(e){toast('Erro: '+e.message,'erro');}
+}
+
+// =================== EXPORTAR / IMPRIMIR ===================
+function exportarTabela(tabelaId, nomeArquivo) {
+  const tabela=document.getElementById(tabelaId);
+  if(!tabela){toast('Nada para exportar','erro');return;}
+  let csv='\uFEFF'; // BOM para Excel reconhecer UTF-8
+  for(const row of tabela.rows){
+    const cols=[];
+    for(const cell of row.cells) cols.push('"'+cell.innerText.replace(/"/g,'""')+'"');
+    csv+=cols.join(';')+'\n';
+  }
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=nomeArquivo+'.csv';a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ Exportado como '+nomeArquivo+'.csv');
+}
+function imprimirPagina() {
+  window.print();
+}
+
+// =================== FIREBASE SYNC ===================
+// =================== START ===================
+load();
+document.getElementById('dataHoje').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+initRel();
+renderDash();
+
+// Firebase sync — lê primeiro, nunca sobrescreve dados do servidor
+setTimeout(()=>{
+  try {
+    if(!db){ document.getElementById('statusFb').textContent='💾 Local'; return; }
+    document.getElementById('statusFb').textContent='🔄 Sincronizando...';
+    db.ref('ltbv2').once('value', snap=>{
+      try {
+        const val=snap.val();
+        if(val && val.movimentacoes){
+          const localNid=D.nid||1, fbNid=val.nid||1;
+          const localQtd=(D.movimentacoes||[]).length, fbQtd=(val.movimentacoes||[]).length;
+          if(fbNid>localNid || fbQtd>localQtd){
+            D=val; localStorage.setItem(SK,JSON.stringify(D));
+            const pg=(document.querySelector('.page.active')||{}).id||'';
+            if(pg==='pg-dashboard') renderDash();
+            else if(pg==='pg-venda') renderVendas();
+            else if(pg==='pg-caixa') renderCaixa();
+            else if(pg==='pg-estoque') renderEst();
+            else if(pg==='pg-historico') renderHist();
+            else if(pg==='pg-relatorio') renderRel();
+            else if(pg==='pg-fiado') renderFiados();
+            document.getElementById('statusFb').textContent='✅ Sincronizado';
+          } else {
+            if(localQtd>=fbQtd) db.ref('ltbv2').set(D).catch(()=>{});
+            document.getElementById('statusFb').textContent='✅ Conectado';
+          }
+        } else {
+          if((D.movimentacoes||[]).length>0) db.ref('ltbv2').set(D).catch(()=>{});
+          document.getElementById('statusFb').textContent='✅ Conectado';
+        }
+        db.ref('ltbv2').on('value', snap2=>{
+          try {
+            if(Date.now()-lastSave<8000) return;
+            const val2=snap2.val(); if(!val2) return;
+            const fbQ2=(val2.movimentacoes||[]).length, lQ2=(D.movimentacoes||[]).length;
+            if((val2.nid||1)<=(D.nid||1)&&fbQ2<=lQ2) return;
+            D=val2; localStorage.setItem(SK,JSON.stringify(D));
+            const pg=(document.querySelector('.page.active')||{}).id||'';
+            if(pg==='pg-dashboard') renderDash();
+            else if(pg==='pg-caixa') renderCaixa();
+            else if(pg==='pg-estoque') renderEst();
+          } catch(e){}
+        });
+      } catch(e){ document.getElementById('statusFb').textContent='💾 Local'; }
+    }).catch(e=>{ document.getElementById('statusFb').textContent='💾 Local'; });
+  } catch(e){ console.warn('Firebase sync erro:',e); document.getElementById('statusFb').textContent='💾 Local'; }
+}, 1500);
+</script>
+
+
+
+<!-- CONTROLE DE LEITE -->
+<div id="pg-leite" class="page">
+  <div class="toolbar-export">
+    <button class="btn-print" onclick="imprimirPagina()">🖨️ Imprimir</button>
+    <button class="btn-export-csv" onclick="exportarTabelaLeite()">📥 Exportar CSV/Excel</button>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+      <div>
+        <div style="font-weight:700;color:#1a3a5c;font-size:1rem">LATICÍNIOS THREE BROTHERS</div>
+        <div id="lcTitulo" style="font-size:.85rem;color:#555;font-weight:600">CONTROLE DE LEITE</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select id="lcMes" onchange="renderLeiteCtrl()" style="padding:6px 10px;border-radius:8px;border:1px solid #ccc;font-size:.9rem">
+          <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+          <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+          <option value="07" selected="">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+          <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+        </select>
+        <select id="lcAno" onchange="renderLeiteCtrl()" style="padding:6px 10px;border-radius:8px;border:1px solid #ccc;font-size:.9rem">
+          <option value="2026" selected="">2026</option><option value="2025">2025</option><option value="2027">2027</option>
+        </select>
+        <input type="number" id="lcPrecoDefault" value="6" step="0.01" placeholder="Preço/L padrão" style="width:120px;padding:6px 10px;border-radius:8px;border:1px solid #ccc;font-size:.9rem" title="Preço por litro padrão para novos lançamentos" onchange="renderLeiteCtrl()">
+        <span style="align-self:center;font-size:.8rem;color:#888">R$/L padrão</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table id="tblLeiteCtrl" style="border-collapse:collapse;min-width:900px;width:100%;font-size:.78rem">
+      <thead>
+        <tr style="background:#1a3a5c;color:#fff">
+          <th rowspan="2" style="padding:6px 8px;text-align:center;border:1px solid #2c4f7c;min-width:80px">DATA</th>
+          <th colspan="3" style="padding:6px 8px;text-align:center;border:1px solid #2c4f7c;background:#1e4a7a">ENTRADA NA LOJA (Litros)</th>
+          <th colspan="2" style="padding:6px 8px;text-align:center;border:1px solid #2c4f7c;background:#1a3a5c">DESTINAÇÃO MANHÃ (Litros)</th>
+          <th colspan="2" style="padding:6px 8px;text-align:center;border:1px solid #2c4f7c;background:#1e4a7a">DESTINAÇÃO TARDE (Litros)</th>
+          <th rowspan="2" style="padding:6px 8px;text-align:center;border:1px solid #2c4f7c;min-width:60px">Retorno<br>Loja</th>
+          <th rowspan="2" style="padding:6px 8px;text-align:center;border:1px solid #2c4f7c;min-width:60px">Retorno<br>Fábrica</th>
+          <th rowspan="2" style="padding:6px 8px;text-align:center;border:1px solid #2c4f7c;min-width:70px;background:#c8a000;color:#fff">TOTAL DO<br>DIA (L)</th>
+          <th colspan="4" style="padding:6px 8px;text-align:center;border:1px solid #2c4f7c;background:#155a2e">VENDAS LOJA</th>
+        </tr>
+        <tr style="background:#2563a8;color:#fff">
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:58px">Manhã<br>(L)</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:58px">Tarde<br>(L)</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:65px;font-weight:700">Total Loja<br>(L)</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:58px">Fábrica</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:58px">Bezerro</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:58px">Fábrica</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:58px">Bezerro</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:65px">Quant.<br>Vendida</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:65px">Quant.<br>Retirada</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:60px">Preço/L</th>
+          <th style="padding:5px 6px;border:1px solid #2c4f7c;text-align:center;min-width:80px">Valor (R$)</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyLeite"></tbody>
+      <tfoot id="tfootLeite"></tfoot>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDIT VENDA -->
+<div class="modal-bg" id="modalEditVenda">
+  <div class="modal" style="max-width:500px">
+    <h3>✏️ Editar Venda</h3>
+    <input type="hidden" id="editVendaId">
+    <div class="form-row">
+      <div class="form-group" style="max-width:130px"><label>Quantidade</label><input type="number" id="editVQtd" step="0.001" oninput="editVPreview()"></div>
+      <div class="form-group" style="max-width:130px"><label>Valor Unit. R$</label><input type="number" id="editVUnit" step="0.01" oninput="editVPreview()"></div>
+      <div class="form-group" style="max-width:110px"><label>Desconto R$</label><input type="number" id="editVDesc" step="0.01" value="0" oninput="editVPreview()"></div>
+    </div>
+    <div id="editVPreviewDiv" style="background:#f0f4f8;border-radius:8px;padding:8px;margin-bottom:8px;display:none">Total: <strong style="color:#27ae60"></strong></div>
+    <div class="form-row">
+      <div class="form-group"><label>Cliente</label><input type="text" id="editVCli"></div>
+      <div class="form-group" style="max-width:150px"><label>Data da Venda</label><input type="date" id="editVData"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px"><label>Pagamento</label>
+      <div class="pgto-btns" id="pgEditV">
+        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Dinheiro&#39;,this)">💵 Dinheiro</button>
+        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;PIX&#39;,this)">📱 PIX</button>
+        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Cartão&#39;,this)">💳 Cartão</button>
+        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Misto&#39;,this)">🔀 Misto</button>
+        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Fiado&#39;,this)">📝 Fiado</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-success" onclick="salvarEditVenda()">💾 Salvar</button>
+      <button class="btn btn-secondary" onclick="fecharEditVenda()">✖️ Cancelar</button>
+    </div>
+  </div>
+</div>
+
+</body></html>
