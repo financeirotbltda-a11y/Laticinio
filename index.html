@@ -690,12 +690,18 @@ function renderDash() {
   const mes=h.substring(0,7);
   const vendasMes=D.movimentacoes.filter(m=>(m.tipo==='venda'||m.tipo==='fiado')&&(m.dr||m.data.split('T')[0]).startsWith(mes)&&!m.exc);
   const rankMap={};
-  vendasMes.forEach(m=>{if(!rankMap[m.pNome])rankMap[m.pNome]={qtd:0,val:0};rankMap[m.pNome].qtd+=m.qtd||0;rankMap[m.pNome].val+=m.total||0;});
+  vendasMes.forEach(m=>{
+    const key=m.pId!=null?String(m.pId):(m.pNome||'').replace(/[\u{1F300}-\u{1FFFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\s]+/gu,'').trim().toLowerCase();
+    if(!rankMap[key])rankMap[key]={qtd:0,val:0,nome:m.pNome||'—'};
+    rankMap[key].qtd+=m.qtd||0;
+    rankMap[key].val+=m.total||0;
+    if(m.pNome) rankMap[key].nome=m.pNome;
+  });
   const rank=Object.entries(rankMap).sort((a,b)=>b[1].val-a[1].val).slice(0,5);
   const medals=['🥇','🥈','🥉','4º','5º'];
   document.getElementById('rankingContent').innerHTML=rank.length?
     `<table><thead><tr><th>#</th><th>Produto</th><th>Qtd Vendida</th><th>Faturado</th></tr></thead><tbody>`+
-    rank.map((r,i)=>`<tr><td>${medals[i]}</td><td>${r[0]}</td><td>${Number(r[1].qtd).toFixed(3)}</td><td>${rs(r[1].val)}</td></tr>`).join('')+
+    rank.map((r,i)=>`<tr><td>${medals[i]}</td><td>${r[1].nome}</td><td>${Number(r[1].qtd).toFixed(3)}</td><td>${rs(r[1].val)}</td></tr>`).join('')+
     `</tbody></table>`:'<p style="color:#aaa;text-align:center;padding:12px">Sem vendas este mês</p>';
   const rec=[...D.movimentacoes].filter(m=>(m.dr||m.data.split('T')[0])===h).reverse().slice(0,10);
   document.getElementById('tbMovHoje').innerHTML=rec.map(m=>`<tr>
