@@ -1157,7 +1157,8 @@ function renderHist() {
   document.getElementById('tbHist').innerHTML=lista.map(m=>{
     const badge=m.exc?`<span class="badge" style="background:#f1f5f9;color:#94a3b8">Excluído</span>`:`<span class="badge ${badges[m.tipo]||''}">${labels[m.tipo]||m.tipo}</span>`;
     const desc=m.pNome||m.desc||m.motivo||'—';
-    const qtd=m.qtd?`${m.qtd} ${m.un||''}`:'—';
+    const isQH=(m.pNome||'').toLowerCase().includes('queijo');
+    const qtd=m.qtd?(isQH&&m.qtdUn?`${m.qtd} kg (${m.qtdUn} un)`:`${m.qtd} ${m.un||''}`):'—';
     const valor=m.total?rs(m.total):m.valor?rs(m.valor):'—';
     const obs=m.cli||m.lote||m.benef||m.obs||m.cat||'—';
     const btn=!m.exc?`<button class="btn btn-danger" onclick="abrirExc(${m.id})">🗑️</button>`:'';
