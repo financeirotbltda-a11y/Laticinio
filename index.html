@@ -67,8 +67,9 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 .modal h3{margin-bottom:12px;color:#1a3a5c}
 
 @media print {
-  nav, header .sub, #statusFb, .btn-print, .btn-export, .filtros, .pgto-btns, input[type=date], input[type=number], input[type=text], select, button:not(.btn-print), .modal-bg { display:none!important; }
-  .page { display:block!important; }
+  nav, header .sub, #statusFb, .btn-print, .btn-export, .filtros, .pgto-btns, input[type=date], input[type=number], input[type=text], select, button:not(.btn-print), .modal-bg, .toolbar-export { display:none!important; }
+  .page { display:none!important; }
+  .page.active { display:block!important; }
   .card { box-shadow:none!important; border:1px solid #ddd; }
   body { background:#fff; }
 }
@@ -141,7 +142,31 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
         <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Dinheiro&#39;,this)" data-val="Dinheiro">💵 Dinheiro</button>
         <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;PIX&#39;,this)" data-val="PIX">📱 PIX</button>
         <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Misto&#39;,this)" data-val="Misto">🔀 Misto</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Fiado&#39;,this)" data-val="Fiado">📝 Fiado</button>
+        <button class="pgto-btn" onclick="spgto('pgV','Fiado',this)" data-val="Fiado">📝 Fiado</button>
+      </div>
+    </div>
+    <div id="mistoDetail" style="display:none;background:#f0f4f8;border-radius:8px;padding:10px;margin-top:6px">
+      <div style="font-size:.8rem;color:#555;margin-bottom:6px">🔀 Detalhes do pagamento misto:</div>
+      <div class="form-row">
+        <div class="form-group"><label>Forma 1</label>
+          <select id="mPgto1" style="padding:6px;border-radius:6px;border:1px solid #ccc">
+            <option value="Dinheiro">💵 Dinheiro</option>
+            <option value="PIX">📱 PIX</option>
+            <option value="Cartão">💳 Cartão</option>
+            <option value="À Vista">🤝 À Vista</option>
+          </select>
+        </div>
+        <div class="form-group" style="max-width:130px"><label>Valor R$</label><input type="text" id="mValor1" placeholder="Ex: 10,00" style="padding:6px;border-radius:6px;border:1px solid #ccc;width:100%"></div>
+        <div class="form-group"><label>Forma 2 (opcional)</label>
+          <select id="mPgto2" style="padding:6px;border-radius:6px;border:1px solid #ccc">
+            <option value="">— Nenhuma —</option>
+            <option value="Dinheiro">💵 Dinheiro</option>
+            <option value="PIX">📱 PIX</option>
+            <option value="Cartão">💳 Cartão</option>
+            <option value="À Vista">🤝 À Vista</option>
+          </select>
+        </div>
+        <div class="form-group" style="max-width:130px"><label>Valor R$</label><input type="text" id="mValor2" placeholder="Ex: 5,00" style="padding:6px;border-radius:6px;border:1px solid #ccc;width:100%"></div>
       </div>
     </div>
     <div id="prevVenda" style="background: rgb(240, 244, 248); border-radius: 8px; padding: 10px; margin: 10px 0px; display: none;">Total: <strong style="color:#27ae60;font-size:1.1rem">R$ 8,00</strong></div>
@@ -221,8 +246,10 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
   <div class="card">
     <h2>💰 Resumo do Caixa</h2>
     <div class="filtros" style="margin-bottom:14px">
-      <div class="form-group" style="max-width:170px"><label>Filtrar por Data</label><input type="date" id="filtCaixaData" onchange="renderCaixa()"></div>
-      <button class="btn btn-secondary" style="align-self:flex-end" onclick="document.getElementById(&#39;filtCaixaData&#39;).value=&#39;&#39;;renderCaixa()">📅 Hoje</button>
+      <div class="form-group" style="max-width:150px"><label>Data Início</label><input type="date" id="filtCaixaDe" onchange="renderCaixa()"></div>
+      <div class="form-group" style="max-width:150px"><label>Data Fim</label><input type="date" id="filtCaixaAte" onchange="renderCaixa()"></div>
+      <button class="btn btn-secondary" style="align-self:flex-end" onclick="filtCaixaHoje()">📅 Hoje</button>
+      <button class="btn btn-secondary" style="align-self:flex-end" onclick="filtCaixaMes()">📆 Mês</button>
     </div>
     <div class="summary-cards" id="resCaixa"></div>
     <div class="summary-cards" id="resCaixaPgto" style="margin-top:10px"></div>
@@ -247,7 +274,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
   </div>
   <div class="card"><h2>🏦 Registrar Depósito</h2>
     <div class="form-row">
-      <div class="form-group" style="max-width:130px"><label>Valor R$</label><input type="number" id="depValor" step="0.01"></div>
+      <div class="form-group" style="max-width:130px"><label>Valor R$</label><input type="text" id="depValor" placeholder="Ex: 1.050,00"></div>
       <div class="form-group" style="max-width:150px"><label>Data Ref.</label><input type="date" id="depData"></div>
       <div class="form-group"><label>Obs</label><input type="text" id="depObs" placeholder="Ex: Banco Itaú"></div>
     </div>
@@ -620,7 +647,19 @@ function nid() {
 function hoje() { return new Date().toISOString().split('T')[0]; }
 function fmtH(iso) { return new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 function fmtDH(iso) { const d=new Date(iso); return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
-function rs(v) { return 'R$ '+Number(v||0).toFixed(2).replace('.',','); }
+function rs(v) { return 'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtData(iso) {
+  if(!iso) return '—';
+  const p=String(iso).split('-');
+  return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:iso;
+}
+function parseMoeda(s) {
+  if(!s) return 0;
+  s=String(s).trim();
+  if(s.includes(',')) return parseFloat(s.replace(/\./g,'').replace(',','.'))||0;
+  if(/^\d{1,3}(\.\d{3})+$/.test(s)) return parseFloat(s.replace(/\./g,''))||0;
+  return parseFloat(s)||0;
+}
 function prod(id) { return D.produtos.find(p=>String(p.id)===String(id)); }
 
 function toast(msg, tipo) {
@@ -668,6 +707,8 @@ function popFiltroProd() { popSel('filtroProd',true); }
 function spgto(cid, val, btn) {
   document.querySelectorAll('#'+cid+' .pgto-btn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel'); btn.dataset.val=val;
+  if(cid==='pgV'){const d=document.getElementById('mistoDetail');if(d)d.style.display=val==='Misto'?'block':'none';}
+  if(cid==='pgEditV'){const d=document.getElementById('mistoEditDetail');if(d)d.style.display=val==='Misto'?'block':'none';}
 }
 function gpgto(cid) { const s=document.querySelector('#'+cid+' .pgto-btn.sel'); return s?s.dataset.val:''; }
 
@@ -771,6 +812,12 @@ function lancarVenda() {
     if(!D.movimentacoes) D.movimentacoes=[];
     const mov={id:nid(),tipo,data:new Date().toISOString(),dr:vData,
       pId:p.id,pNome:p.nome,un:p.un,qtd,unit,desc,total,pgto,cli,obs};
+    if(pgto==='Misto'){
+      mov.pgto1=document.getElementById('mPgto1').value;
+      mov.pgto1Valor=parseMoeda(document.getElementById('mValor1').value);
+      const p2=document.getElementById('mPgto2').value;
+      if(p2){mov.pgto2=p2;mov.pgto2Valor=parseMoeda(document.getElementById('mValor2').value);}
+    }
     if(nomeP.includes('queijo')&&qtdUn>0){mov.qtdUn=qtdUn;}
     D.movimentacoes.push(mov);
     p.loja=Math.round((p.loja-qtd)*1000)/1000;
@@ -790,6 +837,9 @@ function limparVenda() {
   document.getElementById('vDesc').value='0';
   document.getElementById('prevVenda').style.display='none';
   document.querySelectorAll('#pgV .pgto-btn').forEach(b=>b.classList.remove('sel'));
+  const md=document.getElementById('mistoDetail');if(md)md.style.display='none';
+  ['mPgto1','mValor1','mValor2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=id==='mPgto1'?'Dinheiro':'';});
+  const mp2=document.getElementById('mPgto2');if(mp2)mp2.value='';
   const quGrp=document.getElementById('vQtdUnGrp');
   if(quGrp) quGrp.style.display='none';
   const quEl=document.getElementById('vQtdUn');
@@ -922,7 +972,7 @@ function lancarRetiradaCaixa() {
   renderCaixa();
 }
 function lancarDeposito() {
-  const valor=parseFloat(document.getElementById('depValor').value);
+  const valor=parseMoeda(document.getElementById('depValor').value);
   const dr=document.getElementById('depData').value||hoje();
   const obs=document.getElementById('depObs').value.trim();
   if(!valor||valor<=0){toast('Informe o valor!','erro');return;}
@@ -932,21 +982,36 @@ function lancarDeposito() {
   renderCaixa();
 }
 function renderCaixa() {
-  const filtEl=document.getElementById('filtCaixaData');
-  const dia=filtEl&&filtEl.value?filtEl.value:hoje();
-  const mv=D.movimentacoes.filter(m=>(m.dr||m.data.split('T')[0])===dia&&!m.exc);
+  const de=document.getElementById('filtCaixaDe')?.value||'';
+  const ate=document.getElementById('filtCaixaAte')?.value||'';
+  const mv=D.movimentacoes.filter(m=>{
+    if(m.exc) return false;
+    const d=m.dr||m.data.split('T')[0];
+    if(de&&d<de) return false;
+    if(ate&&d>ate) return false;
+    return true;
+  });
   const vendasMv=mv.filter(m=>m.tipo==='venda'||(m.tipo==='fiado'&&m.recebido));
   const fatV=vendasMv.reduce((s,m)=>s+(m.total||0),0);
-  const fatPix=vendasMv.filter(m=>m.pgto==='PIX').reduce((s,m)=>s+(m.total||0),0);
-  const fatDin=vendasMv.filter(m=>m.pgto==='Dinheiro').reduce((s,m)=>s+(m.total||0),0);
-  const fatCart=vendasMv.filter(m=>m.pgto==='Cartão').reduce((s,m)=>s+(m.total||0),0);
-  const fatMisto=vendasMv.filter(m=>m.pgto==='Misto').reduce((s,m)=>s+(m.total||0),0);
-  const fatAVista=vendasMv.filter(m=>m.pgto==='À Vista').reduce((s,m)=>s+(m.total||0),0);
+  let fatPix=0,fatDin=0,fatCart=0,fatMisto=0,fatAVista=0;
+  vendasMv.forEach(m=>{
+    if(m.pgto==='Misto'&&m.pgto1){
+      const add=(t,v)=>{if(t==='PIX')fatPix+=v;else if(t==='Dinheiro')fatDin+=v;else if(t==='Cartão')fatCart+=v;else if(t==='À Vista')fatAVista+=v;else fatMisto+=v;};
+      add(m.pgto1,m.pgto1Valor||0);add(m.pgto2||'',m.pgto2Valor||0);
+    } else {
+      if(m.pgto==='PIX')fatPix+=(m.total||0);
+      else if(m.pgto==='Dinheiro')fatDin+=(m.total||0);
+      else if(m.pgto==='Cartão')fatCart+=(m.total||0);
+      else if(m.pgto==='Misto')fatMisto+=(m.total||0);
+      else if(m.pgto==='À Vista')fatAVista+=(m.total||0);
+    }
+  });
   const fatFiado=mv.filter(m=>m.tipo==='fiado'&&!m.recebido).reduce((s,m)=>s+(m.total||0),0);
   const totD=mv.filter(m=>m.tipo==='despesa').reduce((s,m)=>s+(m.valor||0),0);
   const totR=mv.filter(m=>m.tipo==='retiradaCaixa').reduce((s,m)=>s+(m.valor||0),0);
   const totDep=mv.filter(m=>m.tipo==='deposito').reduce((s,m)=>s+(m.valor||0),0);
-  const label=dia===hoje()?'Hoje ('+new Date().toLocaleDateString('pt-BR')+')':new Date(dia+'T12:00:00').toLocaleDateString('pt-BR');
+  const fmtDt=d=>new Date(d+'T12:00:00').toLocaleDateString('pt-BR');
+  const label=de&&ate&&de===ate?fmtDt(de):de||ate?`${de?fmtDt(de):'início'} a ${ate?fmtDt(ate):'hoje'}`:'Geral';
   document.getElementById('resCaixa').innerHTML=`
     <div class="sc verde"><label>Entradas — ${label}</label><div class="val">${rs(fatV)}</div></div>
     <div class="sc vermelho"><label>Despesas</label><div class="val">${rs(totD)}</div></div>
@@ -967,6 +1032,9 @@ function renderCaixa() {
     <td><button class="btn btn-danger" onclick="abrirExc(${m.id})">🗑️</button></td></tr>`).join('')||
     '<tr><td colspan="6" style="text-align:center;color:#aaa">Sem movimentações</td></tr>';
 }
+
+function filtCaixaHoje(){const h=hoje();document.getElementById('filtCaixaDe').value=h;document.getElementById('filtCaixaAte').value=h;renderCaixa();}
+function filtCaixaMes(){const h=hoje();document.getElementById('filtCaixaDe').value=h.substring(0,7)+'-01';document.getElementById('filtCaixaAte').value=h;renderCaixa();}
 
 // =================== FIADOS ===================
 let fiadoSel=null;
@@ -1167,7 +1235,8 @@ function renderHist() {
     const qtd=m.qtd?(isQH&&m.qtdUn?`${m.qtd} kg (${m.qtdUn} un)`:`${m.qtd} ${m.un||''}`):'—';
     const valor=m.total?rs(m.total):m.valor?rs(m.valor):'—';
     const obs=m.cli||m.lote||m.benef||m.obs||m.cat||'—';
-    const btn=!m.exc?`<button class="btn btn-danger" onclick="abrirExc(${m.id})">🗑️</button>`:'';
+    const canEdit=!m.exc&&(m.tipo==='venda'||m.tipo==='fiado');
+    const btn=!m.exc?`${canEdit?`<button class="btn btn-warning" style="padding:4px 8px;font-size:.8rem;margin-right:4px" onclick="abrirEditVenda(${m.id})">✏️</button>`:''}<button class="btn btn-danger" onclick="abrirExc(${m.id})">🗑️</button>`:'';
     return `<tr class="${m.exc?'row-exc':''}">
       <td>${fmtDH(m.data)}</td><td>${badge}</td><td>${desc}</td>
       <td>${qtd}</td><td>${valor}</td><td>${m.pgto||'—'}</td><td>${obs}</td><td>${btn}</td></tr>`;
@@ -1245,7 +1314,7 @@ function renderRel() {
     <div style="overflow-x:auto">
     <table id="tblRelatorio"><thead><tr><th>Data</th><th>Tipo</th><th>Produto/Descrição</th><th>Qtd</th><th>Valor</th><th>Pagamento</th><th>Cliente/OBS</th></tr></thead>
     <tbody>${allMov.length?allMov.map(m=>`<tr>
-      <td>${m.dr||m.data.split('T')[0]}</td>
+      <td>${fmtData(m.dr||m.data.split('T')[0])}</td>
       <td><span class="badge ${badgesR[m.tipo]||''}">${labelsR[m.tipo]||m.tipo}</span></td>
       <td>${m.pNome||m.desc||'—'}</td>
       <td>${m.qtd?m.qtd+' '+(m.un||''):'—'}</td>
@@ -1398,6 +1467,18 @@ function abrirEditVenda(id){
   document.querySelectorAll('#pgEditV .pgto-btn').forEach(b=>b.classList.remove('sel'));
   const pgtoBtn=document.querySelector(`#pgEditV [data-val="${m.pgto}"]`);
   if(pgtoBtn)pgtoBtn.classList.add('sel');
+  const med=document.getElementById('mistoEditDetail');
+  if(med){
+    med.style.display=m.pgto==='Misto'?'block':'none';
+    if(m.pgto==='Misto'){
+      const e1=document.getElementById('eMPgto1'),v1=document.getElementById('eMValor1');
+      const e2=document.getElementById('eMPgto2'),v2=document.getElementById('eMValor2');
+      if(e1)e1.value=m.pgto1||'Dinheiro';
+      if(v1)v1.value=m.pgto1Valor?String(m.pgto1Valor).replace('.',','):'';
+      if(e2)e2.value=m.pgto2||'';
+      if(v2)v2.value=m.pgto2Valor?String(m.pgto2Valor).replace('.',','):'';
+    }
+  }
   editVPreview();
   document.getElementById('modalEditVenda').classList.add('open');
 }
@@ -1427,7 +1508,14 @@ function salvarEditVenda(){
     m.total=Math.max(0,qtdNova*unitNova-descNova);
     m.pgto=pgtoNovo;m.cli=cliNovo;m.dr=dataNova;
     m.tipo=pgtoNovo==='Fiado'?'fiado':'venda';
-    save(); toast('✅ Venda atualizada!'); fecharEditVenda(); renderVendas();
+    if(pgtoNovo==='Misto'){
+      m.pgto1=document.getElementById('eMPgto1').value;
+      m.pgto1Valor=parseMoeda(document.getElementById('eMValor1').value);
+      const ep2=document.getElementById('eMPgto2').value;
+      if(ep2){m.pgto2=ep2;m.pgto2Valor=parseMoeda(document.getElementById('eMValor2').value);}
+      else{delete m.pgto2;delete m.pgto2Valor;}
+    } else {delete m.pgto1;delete m.pgto1Valor;delete m.pgto2;delete m.pgto2Valor;}
+    save(); toast('✅ Venda atualizada!'); fecharEditVenda(); renderVendas(); renderHist(); renderCaixa();
   }catch(e){toast('Erro: '+e.message,'erro');}
 }
 
@@ -1586,11 +1674,36 @@ setTimeout(()=>{
     </div>
     <div class="form-group" style="margin-bottom:12px"><label>Pagamento</label>
       <div class="pgto-btns" id="pgEditV">
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Dinheiro&#39;,this)">💵 Dinheiro</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;PIX&#39;,this)">📱 PIX</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Cartão&#39;,this)">💳 Cartão</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Misto&#39;,this)">🔀 Misto</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgEditV&#39;,&#39;Fiado&#39;,this)">📝 Fiado</button>
+        <button class="pgto-btn" onclick="spgto('pgEditV','À Vista',this)" data-val="À Vista">🤝 À Vista</button>
+        <button class="pgto-btn" onclick="spgto('pgEditV','Dinheiro',this)" data-val="Dinheiro">💵 Dinheiro</button>
+        <button class="pgto-btn" onclick="spgto('pgEditV','PIX',this)" data-val="PIX">📱 PIX</button>
+        <button class="pgto-btn" onclick="spgto('pgEditV','Cartão',this)" data-val="Cartão">💳 Cartão</button>
+        <button class="pgto-btn" onclick="spgto('pgEditV','Misto',this)" data-val="Misto">🔀 Misto</button>
+        <button class="pgto-btn" onclick="spgto('pgEditV','Fiado',this)" data-val="Fiado">📝 Fiado</button>
+      </div>
+    </div>
+    <div id="mistoEditDetail" style="display:none;background:#f0f4f8;border-radius:8px;padding:10px;margin-bottom:10px">
+      <div style="font-size:.8rem;color:#555;margin-bottom:6px">🔀 Detalhes do pagamento misto:</div>
+      <div class="form-row">
+        <div class="form-group"><label>Forma 1</label>
+          <select id="eMPgto1" style="padding:6px;border-radius:6px;border:1px solid #ccc">
+            <option value="Dinheiro">💵 Dinheiro</option>
+            <option value="PIX">📱 PIX</option>
+            <option value="Cartão">💳 Cartão</option>
+            <option value="À Vista">🤝 À Vista</option>
+          </select>
+        </div>
+        <div class="form-group" style="max-width:120px"><label>Valor R$</label><input type="text" id="eMValor1" placeholder="Ex: 10,00" style="padding:6px;border-radius:6px;border:1px solid #ccc;width:100%"></div>
+        <div class="form-group"><label>Forma 2 (opcional)</label>
+          <select id="eMPgto2" style="padding:6px;border-radius:6px;border:1px solid #ccc">
+            <option value="">— Nenhuma —</option>
+            <option value="Dinheiro">💵 Dinheiro</option>
+            <option value="PIX">📱 PIX</option>
+            <option value="Cartão">💳 Cartão</option>
+            <option value="À Vista">🤝 À Vista</option>
+          </select>
+        </div>
+        <div class="form-group" style="max-width:120px"><label>Valor R$</label><input type="text" id="eMValor2" placeholder="Ex: 5,00" style="padding:6px;border-radius:6px;border:1px solid #ccc;width:100%"></div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
