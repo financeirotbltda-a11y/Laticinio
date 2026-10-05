@@ -42,6 +42,9 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
 .badge-caixa{background:#f3e8ff;color:#6b21a8}
 .badge-transferencia{background:#e0f2fe;color:#0369a1}
 .badge-fiado{background:#fef9c3;color:#854d0e}
+.badge-fechamento{background:#e7e5e4;color:#44403c}
+.badge-ajusteEstoque{background:#f1f5f9;color:#475569}
+input[readonly]{background:#f0f4f8;color:#1a3a5c;font-weight:700}
 .summary-cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 .sc{background:white;border-radius:10px;padding:14px 18px;flex:1;min-width:130px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid #2E75B6}
 .sc label{font-size:.75rem;color:#666;font-weight:600;text-transform:uppercase;display:block}
@@ -125,58 +128,31 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
   <div class="card"><h2>🛒 Lançar Venda</h2>
     <div class="form-row">
       <div class="form-group"><label>Produto</label><select id="vProd" onchange="vInfoProd()"><option value="">Selecione...</option><option value="1">Queijo Mussarela (kg)</option><option value="2">Queijo Coalho (kg)</option><option value="3">Queijo Manteiga (kg)</option><option value="4">Manteiga de Garrafa (un)</option><option value="6">Morango 500 (un)</option><option value="7">Natural 300 (un)</option><option value="8">Natural 500 (un)</option><option value="9">Ameixa  300 (un)</option><option value="10">Ameixa 500 (un)</option><option value="11">Queijo Trança (kg)</option><option value="24">Leite (L)</option><option value="25">Doce (un)</option><option value="26">Cartela de Ovos (un)</option><option value="27">Água Mineral (un)</option><option value="32">Morango 300 (un)</option></select><div id="vEstoqueInfo" style="font-size:.8rem;color:#2E75B6;margin-top:4px;font-weight:600"></div></div>
-      <div class="form-group" style="max-width:120px"><label id="vQtdLabel">Quantidade</label><input type="number" id="vQtd" step="0.001" oninput="vPreview()"></div>
-      <div class="form-group" style="max-width:110px;display:none" id="vQtdUnGrp"><label>Qtd (un/peças)</label><input type="number" id="vQtdUn" step="1" min="0" placeholder="Peças"></div>
-      <div class="form-group" style="max-width:130px"><label>Valor Unit. R$</label><input type="number" id="vUnit" step="0.01" oninput="vPreview()"></div>
-      <div class="form-group" style="max-width:120px"><label>Desconto R$</label><input type="number" id="vDesc" step="0.01" value="0" oninput="vPreview()"></div>
+      <div class="form-group" style="max-width:130px"><label id="vUnitLabel">Valor Unit. R$</label><input type="number" id="vUnit" step="0.01" oninput="vPreview()"></div>
+      <div class="form-group" style="max-width:150px;display:none" id="vValorGrp"><label>Valor Recebido R$</label><input type="number" id="vValor" step="0.01" oninput="vPreview()"></div>
+      <div class="form-group" style="max-width:130px"><label id="vQtdLabel">Quantidade</label><input type="number" id="vQtd" step="0.001" oninput="vPreview()"></div>
+      <div class="form-group" style="max-width:110px;display:none" id="vQtdUnGrp"><label>Qtd (un/peças)</label><input type="number" id="vQtdUn" step="1" min="0" placeholder="Peças" oninput="vPreview()"></div>
+      <div class="form-group" style="max-width:120px" id="vDescGrp"><label>Desconto R$</label><input type="number" id="vDesc" step="0.01" value="0" oninput="vPreview()"></div>
     </div>
     <div class="form-row">
       <div class="form-group" style="max-width:160px"><label>Data da Venda</label><input type="date" id="vData"></div>
       <div class="form-group"><label>Cliente</label><input type="text" id="vCliente" placeholder="Opcional"></div>
       <div class="form-group"><label>Obs</label><input type="text" id="vObs" placeholder="Opcional"></div>
     </div>
-    <div class="form-group"><label>Pagamento</label>
+    <div class="form-group"><label>Tipo</label>
       <div class="pgto-btns" id="pgV">
-        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;À Vista&#39;,this)" data-val="À Vista">🤝 À Vista</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Cartão&#39;,this)" data-val="Cartão">💳 Cartão</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Dinheiro&#39;,this)" data-val="Dinheiro">💵 Dinheiro</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;PIX&#39;,this)" data-val="PIX">📱 PIX</button>
-        <button class="pgto-btn" onclick="spgto(&#39;pgV&#39;,&#39;Misto&#39;,this)" data-val="Misto">🔀 Misto</button>
+        <button class="pgto-btn sel" onclick="spgto('pgV','Venda',this)" data-val="Venda">🛒 Venda</button>
         <button class="pgto-btn" onclick="spgto('pgV','Fiado',this)" data-val="Fiado">📝 Fiado</button>
       </div>
     </div>
-    <div id="mistoDetail" style="display:none;background:#f0f4f8;border-radius:8px;padding:10px;margin-top:6px">
-      <div style="font-size:.8rem;color:#555;margin-bottom:6px">🔀 Detalhes do pagamento misto:</div>
-      <div class="form-row">
-        <div class="form-group"><label>Forma 1</label>
-          <select id="mPgto1" style="padding:6px;border-radius:6px;border:1px solid #ccc">
-            <option value="Dinheiro">💵 Dinheiro</option>
-            <option value="PIX">📱 PIX</option>
-            <option value="Cartão">💳 Cartão</option>
-            <option value="À Vista">🤝 À Vista</option>
-          </select>
-        </div>
-        <div class="form-group" style="max-width:130px"><label>Valor R$</label><input type="text" id="mValor1" placeholder="Ex: 10,00" style="padding:6px;border-radius:6px;border:1px solid #ccc;width:100%"></div>
-        <div class="form-group"><label>Forma 2 (opcional)</label>
-          <select id="mPgto2" style="padding:6px;border-radius:6px;border:1px solid #ccc">
-            <option value="">— Nenhuma —</option>
-            <option value="Dinheiro">💵 Dinheiro</option>
-            <option value="PIX">📱 PIX</option>
-            <option value="Cartão">💳 Cartão</option>
-            <option value="À Vista">🤝 À Vista</option>
-          </select>
-        </div>
-        <div class="form-group" style="max-width:130px"><label>Valor R$</label><input type="text" id="mValor2" placeholder="Ex: 5,00" style="padding:6px;border-radius:6px;border:1px solid #ccc;width:100%"></div>
-      </div>
-    </div>
-    <div id="prevVenda" style="background: rgb(240, 244, 248); border-radius: 8px; padding: 10px; margin: 10px 0px; display: none;">Total: <strong style="color:#27ae60;font-size:1.1rem">R$ 8,00</strong></div>
+    <div id="prevVenda" style="background:#f0f4f8;border-radius:8px;padding:10px;margin:10px 0;display:none"></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn btn-success" onclick="lancarVenda()">✅ Lançar Venda</button>
       <button class="btn btn-secondary" onclick="limparVenda()">Limpar</button>
     </div>
   </div>
   <div class="card"><h2>🛒 Vendas de Hoje</h2>
-    <table><thead><tr><th>Hora</th><th>Produto</th><th>Qtd</th><th>Valor</th><th>Pgto</th><th>Cliente</th><th>Ação</th></tr></thead>
+    <table><thead><tr><th>Hora</th><th>Produto</th><th>Qtd</th><th>Valor</th><th>Tipo</th><th>Cliente</th><th>Ação</th></tr></thead>
     <tbody id="tbVendas"><tr>
     <td>09:55</td><td>Natural 300</td><td>1 un</td>
     <td>R$ 8,00</td><td>Dinheiro</td><td>—</td>
@@ -211,12 +187,13 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
     <div class="form-row">
       <div class="form-group"><label>Produto</label><select id="trProd" onchange="trInfo()"><option value="">Selecione...</option><option value="1">Queijo Mussarela (kg)</option><option value="2">Queijo Coalho (kg)</option><option value="3">Queijo Manteiga (kg)</option><option value="4">Manteiga de Garrafa (un)</option><option value="6">Morango 500 (un)</option><option value="7">Natural 300 (un)</option><option value="8">Natural 500 (un)</option><option value="9">Ameixa  300 (un)</option><option value="10">Ameixa 500 (un)</option><option value="11">Queijo Trança (kg)</option><option value="24">Leite (L)</option><option value="25">Doce (un)</option><option value="26">Cartela de Ovos (un)</option><option value="27">Água Mineral (un)</option><option value="32">Morango 300 (un)</option></select></div>
       <div class="form-group" style="max-width:130px"><label>Quantidade</label><input type="number" id="trQtd" step="0.001"></div>
+      <div class="form-group" style="max-width:160px"><label>Data da Transferência</label><input type="date" id="trData"></div>
     </div>
     <div id="trInfoDiv" style="font-size:.85rem;color:#555;margin-bottom:10px"></div>
     <button class="btn btn-primary" onclick="lancarTransf()">🚚 Transferir</button>
   </div>
-  <div class="card"><h2>🚚 Transferências de Hoje</h2>
-    <table><thead><tr><th>Hora</th><th>Produto</th><th>Qtd</th></tr></thead>
+  <div class="card"><h2>🚚 Últimas Transferências</h2>
+    <table><thead><tr><th>Data</th><th>Produto</th><th>Qtd</th></tr></thead>
     <tbody id="tbTransf"><tr><td colspan="3" style="text-align:center;color:#aaa">Sem transferências hoje</td></tr></tbody></table>
   </div>
 </div>
@@ -231,12 +208,13 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
       <div class="form-group" style="max-width:130px"><label>Quantidade</label><input type="number" id="retQtd" step="0.001"></div>
       <div class="form-group"><label>Motivo</label><input type="text" id="retMotivo" placeholder="Ex: Doação"></div>
       <div class="form-group"><label>Beneficiário</label><input type="text" id="retBenef" placeholder="Para quem"></div>
+      <div class="form-group" style="max-width:160px"><label>Data da Doação/Retirada</label><input type="date" id="retData"></div>
     </div>
     <div id="retInfoDiv" style="font-size:.85rem;color:#555;margin-bottom:10px"></div>
     <button class="btn btn-warning" onclick="lancarRetirada()">🤝 Registrar</button>
   </div>
-  <div class="card"><h2>🤝 Retiradas de Hoje</h2>
-    <table><thead><tr><th>Hora</th><th>Produto</th><th>Origem</th><th>Qtd</th><th>Motivo</th><th>Beneficiário</th></tr></thead>
+  <div class="card"><h2>🤝 Últimas Doações / Retiradas</h2>
+    <table><thead><tr><th>Data</th><th>Produto</th><th>Origem</th><th>Qtd</th><th>Motivo</th><th>Beneficiário</th></tr></thead>
     <tbody id="tbRet"><tr><td colspan="6" style="text-align:center;color:#aaa">Sem retiradas hoje</td></tr></tbody></table>
   </div>
 </div>
@@ -253,6 +231,16 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
     </div>
     <div class="summary-cards" id="resCaixa"></div>
     <div class="summary-cards" id="resCaixaPgto" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card"><h2>🧾 Fechamento do Caixa do Dia</h2>
+    <div class="form-row">
+      <div class="form-group" style="max-width:160px"><label>Data</label><input type="date" id="fcData" onchange="fcCarregar()"></div>
+      <div class="form-group" style="max-width:150px"><label>Dinheiro R$</label><input type="text" id="fcDin" placeholder="0,00" oninput="fcInfo()"></div>
+      <div class="form-group" style="max-width:150px"><label>PIX R$</label><input type="text" id="fcPix" placeholder="0,00" oninput="fcInfo()"></div>
+    </div>
+    <div id="fcInfoDiv" style="font-size:.85rem;color:#555;margin-bottom:10px;line-height:1.6"></div>
+    <button class="btn btn-success" onclick="lancarFechamento()">🧾 Fechar Caixa</button>
   </div>
 
   <div class="card"><h2>💸 Lançar Despesa</h2>
@@ -290,7 +278,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
     <button class="btn btn-primary" onclick="lancarRetornoLeite()">🥛 Registrar Retorno</button>
   </div>
   <div class="card"><h2>📋 Movimentações do Caixa</h2>
-    <table><thead><tr><th>Hora</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Pgto</th><th>Ação</th></tr></thead>
+    <table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Pgto</th><th>Ação</th></tr></thead>
     <tbody id="tbCaixa"><tr>
     <td>08:01</td><td><span class="badge badge-despesa">despesa</span></td>
     <td>Saco de Leite</td><td>R$ 75,00</td><td>Dinheiro</td>
@@ -303,6 +291,10 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
   <div class="card"><h2>📝 Fiados Pendentes</h2>
     <table><thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Valor</th><th>Ação</th></tr></thead>
     <tbody id="tbFiados"><tr><td colspan="6" style="text-align:center;color:#aaa">Nenhum fiado pendente</td></tr></tbody></table>
+  </div>
+  <div class="card"><h2>✅ Fiados Recebidos</h2>
+    <table><thead><tr><th>Data Venda</th><th>Data Recebido</th><th>Cliente</th><th>Produto</th><th>Valor</th></tr></thead>
+    <tbody id="tbFiadosRec"></tbody></table>
   </div>
 </div>
 
@@ -405,6 +397,8 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
           <option value="retiradaCaixa">Ret. Caixa</option>
           <option value="deposito">Depósitos</option>
           <option value="retornoLeite">Retorno Leite</option>
+          <option value="fechamento">Fechamento Caixa</option>
+          <option value="ajusteEstoque">Ajuste Estoque</option>
         </select>
       </div>
       <div class="form-group"><label>Produto</label><select id="filtroProd"><option value="">Todos</option><option value="1">Queijo Mussarela (kg)</option><option value="2">Queijo Coalho (kg)</option><option value="3">Queijo Manteiga (kg)</option><option value="4">Manteiga de Garrafa (un)</option><option value="6">Morango 500 (un)</option><option value="7">Natural 300 (un)</option><option value="8">Natural 500 (un)</option><option value="9">Ameixa  300 (un)</option><option value="10">Ameixa 500 (un)</option><option value="11">Queijo Trança (kg)</option><option value="24">Leite (L)</option><option value="25">Doce (un)</option><option value="26">Cartela de Ovos (un)</option><option value="27">Água Mineral (un)</option><option value="32">Morango 300 (un)</option></select></div>
@@ -426,7 +420,8 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
     <div id="totalHist" style="margin-top: 14px; padding: 12px 16px; background: rgb(240, 244, 248); border-radius: 8px; display: block;">
       <strong>Totais do filtro:</strong>
       <span id="totalHistValor" style="margin-left:12px;color:#27ae60;font-size:1.05rem;font-weight:700"></span>
-      <span id="totalHistQtd" style="margin-left:16px;color:#555;font-size:.9rem">| Qtd total: 24</span>
+      <span id="totalHistQtd" style="margin-left:16px;color:#555;font-size:.9rem"></span>
+      <div id="totalHistVend" style="margin-top:6px;color:#1a3a5c;font-size:.95rem;font-weight:600"></div>
     </div>
   </div>
 </div>
@@ -594,11 +589,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f4f8}
   <div class="modal">
     <h3>✅ Receber Fiado</h3>
     <p id="infoFiado" style="margin-bottom:12px;color:#555"></p>
-    <div class="pgto-btns" id="pgFiado">
-      <button class="pgto-btn" onclick="spgto(&#39;pgFiado&#39;,&#39;Dinheiro&#39;,this)">💵 Dinheiro</button>
-      <button class="pgto-btn" onclick="spgto(&#39;pgFiado&#39;,&#39;PIX&#39;,this)">📱 PIX</button>
-      <button class="pgto-btn" onclick="spgto(&#39;pgFiado&#39;,&#39;Cartão&#39;,this)">💳 Cartão</button>
-    </div>
+    <div class="form-group" style="max-width:180px"><label>Data do Recebimento</label><input type="date" id="fiadoData"></div>
     <div style="display:flex;gap:8px;margin-top:14px">
       <button class="btn btn-success" onclick="confirmarFiado()">✅ Confirmar</button>
       <button class="btn btn-secondary" onclick="fecharFiado()">Cancelar</button>
@@ -661,6 +652,12 @@ function parseMoeda(s) {
   return parseFloat(s)||0;
 }
 function prod(id) { return D.produtos.find(p=>String(p.id)===String(id)); }
+function isQueijo(p) { return !!p&&(p.nome||'').toLowerCase().includes('queijo'); }
+function isKg(p) { return !!p&&((p.un||'').toLowerCase()==='kg'||isQueijo(p)); }
+function r3(v) { return Math.round((parseFloat(v)||0)*1000)/1000; }
+function r2(v) { return Math.round((parseFloat(v)||0)*100)/100; }
+function dOf(m) { return m.dr||String(m.data||'').split('T')[0]; }
+function fmtKg(v) { return Number(r3(v)).toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3}); }
 
 function toast(msg, tipo) {
   const el=document.getElementById('toast');
@@ -707,8 +704,6 @@ function popFiltroProd() { popSel('filtroProd',true); }
 function spgto(cid, val, btn) {
   document.querySelectorAll('#'+cid+' .pgto-btn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel'); btn.dataset.val=val;
-  if(cid==='pgV'){const d=document.getElementById('mistoDetail');if(d)d.style.display=val==='Misto'?'block':'none';}
-  if(cid==='pgEditV'){const d=document.getElementById('mistoEditDetail');if(d)d.style.display=val==='Misto'?'block':'none';}
 }
 function gpgto(cid) { const s=document.querySelector('#'+cid+' .pgto-btn.sel'); return s?s.dataset.val:''; }
 
@@ -756,72 +751,72 @@ function renderDash() {
 function vInfoProd() {
   const p=prod(document.getElementById('vProd').value);
   if(p&&p.preco) document.getElementById('vUnit').value=p.preco;
+  const kg=isKg(p), q=isQueijo(p);
   const infoEl=document.getElementById('vEstoqueInfo');
-  const isQ=p&&(p.nome||'').toLowerCase().includes('queijo');
   if(infoEl){
-    if(isQ) infoEl.innerHTML=`📦 Estoque Loja: <strong>${p.loja||0} kg</strong> | <strong>${p.lojaUn||0} un</strong>`;
+    if(q) infoEl.innerHTML=`📦 Estoque Loja: <strong>${p.loja||0} kg</strong> | <strong>${p.lojaUn||0} un</strong>`;
     else infoEl.textContent=p?`📦 Estoque disponível (Loja): ${p.loja||0} ${p.un}`:'';
   }
-  const qtdUnGrp=document.getElementById('vQtdUnGrp');
-  const qtdLabel=document.getElementById('vQtdLabel');
-  if(qtdUnGrp) qtdUnGrp.style.display=isQ?'':'none';
-  if(qtdLabel) qtdLabel.textContent=isQ?'Peso (kg)':'Quantidade';
-  if(!isQ&&document.getElementById('vQtdUn')) document.getElementById('vQtdUn').value='';
+  document.getElementById('vValorGrp').style.display=kg?'':'none';
+  document.getElementById('vDescGrp').style.display=kg?'none':'';
+  document.getElementById('vQtdUnGrp').style.display=q?'':'none';
+  document.getElementById('vUnitLabel').textContent=kg?'Valor do kg R$':'Valor Unit. R$';
+  document.getElementById('vQtdLabel').textContent=kg?'Quilos':'Quantidade';
+  document.getElementById('vQtd').readOnly=kg;
+  if(kg){document.getElementById('vDesc').value='0';}
+  else{document.getElementById('vValor').value='';}
+  if(!q) document.getElementById('vQtdUn').value='';
   vPreview();
 }
-function vPreview() {
-  const qtd=parseFloat(document.getElementById('vQtd').value)||0;
+function vCalc() {
+  const p=prod(document.getElementById('vProd').value);
+  const kg=isKg(p);
   const unit=parseFloat(document.getElementById('vUnit').value)||0;
-  const desc=parseFloat(document.getElementById('vDesc').value)||0;
-  let tot=Math.max(0,qtd*unit-desc);
-  const pId=document.getElementById('vProd').value;
-  const p=prod(pId);
-  const nomeP=p?(p.nome||'').toLowerCase():'';
-  const isQ=nomeP.includes('queijo');
-  if(isQ) tot=Math.floor(tot);
+  let qtd,total,desc=0;
+  if(kg){
+    total=r2(document.getElementById('vValor').value);
+    qtd=unit>0?r3(total/unit):0;
+    document.getElementById('vQtd').value=qtd>0?qtd:'';
+  } else {
+    qtd=parseFloat(document.getElementById('vQtd').value)||0;
+    desc=parseFloat(document.getElementById('vDesc').value)||0;
+    total=r2(Math.max(0,qtd*unit-desc));
+  }
+  return {p,kg,unit,qtd,total,desc};
+}
+function vPreview() {
+  const c=vCalc();
   const el=document.getElementById('prevVenda');
-  el.style.display=qtd>0&&unit>0?'block':'none';
-  const qtdUn=parseInt((document.getElementById('vQtdUn')||{}).value)||0;
-  const unExtra=isQ&&qtdUn>0?` <span style="font-size:.8rem;color:#555;margin-left:8px">(${qtdUn} peça${qtdUn!==1?'s':''})</span>`:'';
-  el.innerHTML=`Total: <strong style="color:#27ae60;font-size:1.1rem">${rs(tot)}</strong>${isQ?'<span style="font-size:.75rem;color:#888;margin-left:8px">(arredondado para baixo)</span>':''}${unExtra}`;
+  el.style.display=c.qtd>0&&c.unit>0?'block':'none';
+  const qtdUn=parseInt(document.getElementById('vQtdUn').value)||0;
+  const pecas=isQueijo(c.p)&&qtdUn>0?` <span style="font-size:.8rem;color:#555;margin-left:8px">(${qtdUn} peça${qtdUn!==1?'s':''})</span>`:'';
+  el.innerHTML=(c.kg?`Quilos: <strong style="color:#1a3a5c;font-size:1.1rem">${fmtKg(c.qtd)} kg</strong> &nbsp;|&nbsp; `:'')+
+    `Total: <strong style="color:#27ae60;font-size:1.1rem">${rs(c.total)}</strong>${pecas}`;
 }
 function lancarVenda() {
   try {
     const pId=document.getElementById('vProd').value;
-    const qtd=parseFloat(document.getElementById('vQtd').value);
-    const unit=parseFloat(document.getElementById('vUnit').value);
-    const desc=parseFloat(document.getElementById('vDesc').value)||0;
-    const pgto=gpgto('pgV');
+    if(!pId){toast('Selecione um produto!','erro');return;}
+    const c=vCalc(), p=c.p;
+    if(!p){toast('Produto não encontrado!','erro');return;}
+    if(!c.unit||c.unit<=0){toast(c.kg?'Informe o valor do kg!':'Informe o valor unitário!','erro');return;}
+    if(c.kg&&(!c.total||c.total<=0)){toast('Informe o valor recebido!','erro');return;}
+    if(!c.qtd||c.qtd<=0){toast('Informe a quantidade!','erro');return;}
+    const tipoSel=gpgto('pgV')||'Venda';
     const cli=document.getElementById('vCliente').value.trim();
     const obs=document.getElementById('vObs').value.trim();
-    const vData=document.getElementById('vData')?document.getElementById('vData').value||hoje():hoje();
-    const qtdUn=parseInt((document.getElementById('vQtdUn')||{}).value)||0;
-    if(!pId){toast('Selecione um produto!','erro');return;}
-    if(!qtd||qtd<=0){toast('Informe a quantidade!','erro');return;}
-    if(!unit||unit<=0){toast('Informe o valor unitário!','erro');return;}
-    if(!pgto){toast('Selecione o pagamento!','erro');return;}
-    const p=prod(pId);
-    if(!p){toast('Produto não encontrado!','erro');return;}
+    const vData=document.getElementById('vData').value||hoje();
+    const qtdUn=parseInt(document.getElementById('vQtdUn').value)||0;
     p.loja=parseFloat(p.loja)||0;
-    if(p.loja<qtd){toast('Estoque da Loja insuficiente! Disponível: '+p.loja+' '+p.un,'erro');return;}
-    let total=Math.max(0,qtd*unit-desc);
-    // Queijos: arredondar para baixo (sem centavos)
-    const nomeP=(p.nome||'').toLowerCase();
-    if(nomeP.includes('queijo')) total=Math.floor(total);
-    const tipo=pgto==='Fiado'?'fiado':'venda';
+    if(p.loja<c.qtd){toast('Estoque da Loja insuficiente! Disponível: '+p.loja+' '+p.un,'erro');return;}
+    const tipo=tipoSel==='Fiado'?'fiado':'venda';
     if(!D.movimentacoes) D.movimentacoes=[];
     const mov={id:nid(),tipo,data:new Date().toISOString(),dr:vData,
-      pId:p.id,pNome:p.nome,un:p.un,qtd,unit,desc,total,pgto,cli,obs};
-    if(pgto==='Misto'){
-      mov.pgto1=document.getElementById('mPgto1').value;
-      mov.pgto1Valor=parseMoeda(document.getElementById('mValor1').value);
-      const p2=document.getElementById('mPgto2').value;
-      if(p2){mov.pgto2=p2;mov.pgto2Valor=parseMoeda(document.getElementById('mValor2').value);}
-    }
-    if(nomeP.includes('queijo')&&qtdUn>0){mov.qtdUn=qtdUn;}
+      pId:p.id,pNome:p.nome,un:p.un,qtd:c.qtd,unit:c.unit,desc:c.desc,total:c.total,pgto:tipo==='fiado'?'Fiado':'',cli,obs};
+    if(isQueijo(p)&&qtdUn>0) mov.qtdUn=qtdUn;
     D.movimentacoes.push(mov);
-    p.loja=Math.round((p.loja-qtd)*1000)/1000;
-    if(nomeP.includes('queijo')&&qtdUn>0) p.lojaUn=Math.max(0,(p.lojaUn||0)-qtdUn);
+    p.loja=r3(p.loja-c.qtd);
+    if(isQueijo(p)&&qtdUn>0) p.lojaUn=Math.max(0,(p.lojaUn||0)-qtdUn);
     save();
     toast(tipo==='fiado'?'📝 Fiado registrado!':'✅ Venda lançada!');
     limparVenda();
@@ -831,27 +826,30 @@ function lancarVenda() {
     console.error('lancarVenda erro:',e);
   }
 }
-
 function limparVenda() {
-  ['vProd','vQtd','vUnit','vCliente','vObs','vData'].forEach(id=>document.getElementById(id).value='');
+  ['vProd','vQtd','vUnit','vValor','vQtdUn','vCliente','vObs','vData'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('vDesc').value='0';
   document.getElementById('prevVenda').style.display='none';
-  document.querySelectorAll('#pgV .pgto-btn').forEach(b=>b.classList.remove('sel'));
-  const md=document.getElementById('mistoDetail');if(md)md.style.display='none';
-  ['mPgto1','mValor1','mValor2'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=id==='mPgto1'?'Dinheiro':'';});
-  const mp2=document.getElementById('mPgto2');if(mp2)mp2.value='';
-  const quGrp=document.getElementById('vQtdUnGrp');
-  if(quGrp) quGrp.style.display='none';
-  const quEl=document.getElementById('vQtdUn');
-  if(quEl) quEl.value='';
-  const lbl=document.getElementById('vQtdLabel');
-  if(lbl) lbl.textContent='Quantidade';
+  document.getElementById('vEstoqueInfo').textContent='';
+  document.querySelectorAll('#pgV .pgto-btn').forEach(b=>b.classList.toggle('sel',b.dataset.val==='Venda'));
+  document.getElementById('vValorGrp').style.display='none';
+  document.getElementById('vQtdUnGrp').style.display='none';
+  document.getElementById('vDescGrp').style.display='';
+  document.getElementById('vUnitLabel').textContent='Valor Unit. R$';
+  document.getElementById('vQtdLabel').textContent='Quantidade';
+  document.getElementById('vQtd').readOnly=false;
+}
+function fmtQtdMov(m) {
+  if(!m.qtd) return '—';
+  const kg=(m.un||'').toLowerCase()==='kg';
+  const q=kg?fmtKg(m.qtd)+' kg':m.qtd+' '+(m.un||'');
+  return m.qtdUn?`${q} (${m.qtdUn} un)`:q;
 }
 function renderVendas() {
-  const lista=D.movimentacoes.filter(m=>(m.tipo==='venda'||m.tipo==='fiado')&&(m.dr||m.data.split('T')[0])===hoje()&&!m.exc).reverse();
+  const lista=D.movimentacoes.filter(m=>(m.tipo==='venda'||m.tipo==='fiado')&&dOf(m)===hoje()&&!m.exc).reverse();
   document.getElementById('tbVendas').innerHTML=lista.map(m=>`<tr>
-    <td>${fmtH(m.data)}</td><td>${m.pNome}</td><td>${m.qtd} ${m.un}</td>
-    <td>${rs(m.total)}</td><td>${m.pgto}</td><td>${m.cli||'—'}</td>
+    <td>${fmtH(m.data)}</td><td>${m.pNome}</td><td>${fmtQtdMov(m)}</td>
+    <td>${rs(m.total)}</td><td>${m.tipo==='fiado'?'Fiado':(m.pgto||'Venda')}</td><td>${m.cli||'—'}</td>
     <td><button class="btn btn-warning" style="padding:4px 8px;font-size:.8rem;margin-right:4px" onclick="abrirEditVenda(${m.id})">✏️</button><button class="btn btn-danger" onclick="abrirExc(${m.id})">🗑️</button></td></tr>`).join('')||
     '<tr><td colspan="7" style="text-align:center;color:#aaa">Sem vendas hoje</td></tr>';
   const fat=lista.reduce((s,m)=>s+(m.total||0),0);
@@ -899,10 +897,11 @@ function lancarTransf() {
     p.fab=Math.round((p.fab-qtd)*1000)/1000;
     p.loja=Math.round((p.loja+qtd)*1000)/1000;
     if(!D.movimentacoes) D.movimentacoes=[];
-    D.movimentacoes.push({id:nid(),tipo:'transferencia',data:new Date().toISOString(),dr:hoje(),pId:p.id,pNome:p.nome,un:p.un,qtd});
+    D.movimentacoes.push({id:nid(),tipo:'transferencia',data:new Date().toISOString(),dr:document.getElementById('trData').value||hoje(),pId:p.id,pNome:p.nome,un:p.un,qtd});
     save();
     toast('🚚 Transferência realizada!');
     document.getElementById('trQtd').value='';
+    document.getElementById('trData').value='';
     trInfo();
     renderTransf();
   } catch(e) {
@@ -911,11 +910,11 @@ function lancarTransf() {
   }
 }
 function renderTransf() {
-  const lista=D.movimentacoes.filter(m=>m.tipo==='transferencia'&&(m.dr||m.data.split('T')[0])===hoje()).reverse();
+  const lista=D.movimentacoes.filter(m=>m.tipo==='transferencia'&&!m.exc).sort((a,b)=>(dOf(b)+b.data).localeCompare(dOf(a)+a.data)).slice(0,30);
   document.getElementById('tbTransf').innerHTML=lista.map(m=>`<tr>
-    <td>${fmtH(m.data)}</td><td>${m.pNome}</td>
+    <td>${fmtData(dOf(m))}</td><td>${m.pNome}</td>
     <td style="color:#0369a1;font-weight:700">${m.qtd} ${m.un}</td></tr>`).join('')||
-    '<tr><td colspan="3" style="text-align:center;color:#aaa">Sem transferências hoje</td></tr>';
+    '<tr><td colspan="3" style="text-align:center;color:#aaa">Sem transferências</td></tr>';
 }
 
 // =================== RETIRADAS ===================
@@ -936,17 +935,17 @@ function lancarRetirada() {
   const campo=ori==='fabrica'?'fab':'loja';
   if(p[campo]<qtd){toast('Estoque insuficiente! Disponível: '+p[campo],'erro');return;}
   p[campo]=p[campo]-qtd;
-  D.movimentacoes.push({id:nid(),tipo:'retirada',data:new Date().toISOString(),dr:hoje(),pId:p.id,pNome:p.nome,un:p.un,qtd,ori,motivo,benef});
+  D.movimentacoes.push({id:nid(),tipo:'retirada',data:new Date().toISOString(),dr:document.getElementById('retData').value||hoje(),pId:p.id,pNome:p.nome,un:p.un,qtd,ori,motivo,benef});
   save(); toast('🤝 Retirada registrada!');
-  ['retProd','retQtd','retMotivo','retBenef'].forEach(id=>document.getElementById(id).value='');
+  ['retProd','retQtd','retMotivo','retBenef','retData'].forEach(id=>document.getElementById(id).value='');
   renderRet();
 }
 function renderRet() {
-  const lista=D.movimentacoes.filter(m=>m.tipo==='retirada'&&(m.dr||m.data.split('T')[0])===hoje()).reverse();
+  const lista=D.movimentacoes.filter(m=>m.tipo==='retirada'&&!m.exc).sort((a,b)=>(dOf(b)+b.data).localeCompare(dOf(a)+a.data)).slice(0,30);
   document.getElementById('tbRet').innerHTML=lista.map(m=>`<tr>
-    <td>${fmtH(m.data)}</td><td>${m.pNome}</td><td>${m.ori==='fabrica'?'Fábrica':'Loja'}</td>
+    <td>${fmtData(dOf(m))}</td><td>${m.pNome}</td><td>${m.ori==='fabrica'?'Fábrica':'Loja'}</td>
     <td>${m.qtd} ${m.un}</td><td>${m.motivo||'—'}</td><td>${m.benef||'—'}</td></tr>`).join('')||
-    '<tr><td colspan="6" style="text-align:center;color:#aaa">Sem retiradas hoje</td></tr>';
+    '<tr><td colspan="6" style="text-align:center;color:#aaa">Sem retiradas</td></tr>';
 }
 
 // =================== CAIXA ===================
@@ -984,28 +983,33 @@ function lancarDeposito() {
 function renderCaixa() {
   const de=document.getElementById('filtCaixaDe')?.value||'';
   const ate=document.getElementById('filtCaixaAte')?.value||'';
-  const mv=D.movimentacoes.filter(m=>{
-    if(m.exc) return false;
-    const d=m.dr||m.data.split('T')[0];
-    if(de&&d<de) return false;
-    if(ate&&d>ate) return false;
-    return true;
-  });
-  const vendasMv=mv.filter(m=>m.tipo==='venda'||(m.tipo==='fiado'&&m.recebido));
-  const fatV=vendasMv.reduce((s,m)=>s+(m.total||0),0);
+  const inR=d=>!((de&&d<de)||(ate&&d>ate));
+  const ativos=D.movimentacoes.filter(m=>!m.exc);
+  const mv=ativos.filter(m=>inR(dOf(m)));
+  // entradas: vendas pela data da venda + fiados pela data do recebimento
+  const entradas=[
+    ...mv.filter(m=>m.tipo==='venda').map(m=>({m,d:dOf(m)})),
+    ...ativos.filter(m=>m.tipo==='fiado'&&m.recebido).map(m=>({m,d:m.drRec||dOf(m)})).filter(x=>inR(x.d))
+  ];
+  const fatV=entradas.reduce((s,x)=>s+(x.m.total||0),0);
   let fatPix=0,fatDin=0,fatCart=0,fatMisto=0,fatAVista=0;
-  vendasMv.forEach(m=>{
+  const semFormaDia={};
+  entradas.forEach(({m,d})=>{
     if(m.pgto==='Misto'&&m.pgto1){
       const add=(t,v)=>{if(t==='PIX')fatPix+=v;else if(t==='Dinheiro')fatDin+=v;else if(t==='Cartão')fatCart+=v;else if(t==='À Vista')fatAVista+=v;else fatMisto+=v;};
       add(m.pgto1,m.pgto1Valor||0);add(m.pgto2||'',m.pgto2Valor||0);
-    } else {
-      if(m.pgto==='PIX')fatPix+=(m.total||0);
-      else if(m.pgto==='Dinheiro')fatDin+=(m.total||0);
-      else if(m.pgto==='Cartão')fatCart+=(m.total||0);
-      else if(m.pgto==='Misto')fatMisto+=(m.total||0);
-      else if(m.pgto==='À Vista')fatAVista+=(m.total||0);
     }
+    else if(m.pgto==='PIX')fatPix+=(m.total||0);
+    else if(m.pgto==='Dinheiro')fatDin+=(m.total||0);
+    else if(m.pgto==='Cartão')fatCart+=(m.total||0);
+    else if(m.pgto==='Misto')fatMisto+=(m.total||0);
+    else if(m.pgto==='À Vista')fatAVista+=(m.total||0);
+    else semFormaDia[d]=(semFormaDia[d]||0)+(m.total||0);
   });
+  const fechs=mv.filter(m=>m.tipo==='fechamento');
+  const diasFech=new Set(fechs.map(f=>dOf(f)));
+  fechs.forEach(f=>{fatDin+=f.din||0;fatPix+=f.pix||0;});
+  const semFech=Object.entries(semFormaDia).filter(([d])=>!diasFech.has(d)).reduce((s,[,v])=>s+v,0);
   const fatFiado=mv.filter(m=>m.tipo==='fiado'&&!m.recebido).reduce((s,m)=>s+(m.total||0),0);
   const totD=mv.filter(m=>m.tipo==='despesa').reduce((s,m)=>s+(m.valor||0),0);
   const totR=mv.filter(m=>m.tipo==='retiradaCaixa').reduce((s,m)=>s+(m.valor||0),0);
@@ -1018,19 +1022,62 @@ function renderCaixa() {
     <div class="sc laranja"><label>Retiradas</label><div class="val">${rs(totR)}</div></div>
     <div class="sc"><label>Depósitos</label><div class="val">${rs(totDep)}</div></div>
     <div class="sc amarelo"><label>Saldo</label><div class="val">${rs(fatV-totD-totR)}</div></div>`;
-  if(document.getElementById('resCaixaPgto')) document.getElementById('resCaixaPgto').innerHTML=`
-    <div class="sc verde"><label>🤝 À Vista</label><div class="val" style="font-size:1.1rem">${rs(fatAVista)}</div></div>
-    <div class="sc verde"><label>💳 Cartão</label><div class="val" style="font-size:1.1rem">${rs(fatCart)}</div></div>
-    <div class="sc verde"><label>💵 Dinheiro</label><div class="val" style="font-size:1.1rem">${rs(fatDin)}</div></div>
-    <div class="sc verde"><label>📱 PIX</label><div class="val" style="font-size:1.1rem">${rs(fatPix)}</div></div>
-    <div class="sc verde"><label>🔀 Misto</label><div class="val" style="font-size:1.1rem">${rs(fatMisto)}</div></div>
-    <div class="sc amarelo"><label>📝 Fiados (pendente)</label><div class="val" style="font-size:1.1rem">${rs(fatFiado)}</div></div>`;
-  const lista=mv.filter(m=>['despesa','retiradaCaixa','deposito','retornoLeite'].includes(m.tipo)).reverse();
+  const card=(cls,lbl,v)=>`<div class="sc ${cls}"><label>${lbl}</label><div class="val" style="font-size:1.1rem">${rs(v)}</div></div>`;
+  document.getElementById('resCaixaPgto').innerHTML=
+    card('verde','💵 Dinheiro',fatDin)+card('verde','📱 PIX',fatPix)+
+    (fatCart?card('verde','💳 Cartão',fatCart):'')+(fatAVista?card('verde','🤝 À Vista',fatAVista):'')+(fatMisto?card('verde','🔀 Misto',fatMisto):'')+
+    card('laranja','⏳ Sem fechamento',semFech)+card('amarelo','📝 Fiados (pendente)',fatFiado);
+  const lista=mv.filter(m=>['despesa','retiradaCaixa','deposito','retornoLeite','fechamento'].includes(m.tipo)).sort((a,b)=>(dOf(b)+b.data).localeCompare(dOf(a)+a.data));
   document.getElementById('tbCaixa').innerHTML=lista.map(m=>`<tr>
-    <td>${fmtH(m.data)}</td><td><span class="badge badge-${m.tipo}">${m.tipo}</span></td>
-    <td>${m.desc||m.motivo||m.obs||'—'}</td><td>${rs(m.valor)}</td><td>${m.pgto||'—'}</td>
+    <td>${fmtData(dOf(m))}</td><td><span class="badge badge-${m.tipo}">${m.tipo==='fechamento'?'fechamento':m.tipo}</span></td>
+    <td>${m.desc||m.motivo||m.obs||'—'}</td><td>${m.tipo==='retornoLeite'?m.qtd+' L':rs(m.valor)}</td><td>${m.pgto||'—'}</td>
     <td><button class="btn btn-danger" onclick="abrirExc(${m.id})">🗑️</button></td></tr>`).join('')||
     '<tr><td colspan="6" style="text-align:center;color:#aaa">Sem movimentações</td></tr>';
+  const fc=document.getElementById('fcData');
+  if(fc&&!fc.value){fc.value=hoje();fcCarregar();} else fcInfo();
+}
+
+// =================== FECHAMENTO DO CAIXA ===================
+function fcEntradasDia(d) {
+  const ativos=D.movimentacoes.filter(m=>!m.exc);
+  const vd=ativos.filter(m=>m.tipo==='venda'&&dOf(m)===d);
+  const fr=ativos.filter(m=>m.tipo==='fiado'&&m.recebido&&(m.drRec||dOf(m))===d);
+  return {vd,fr,totV:vd.reduce((s,m)=>s+(m.total||0),0),totF:fr.reduce((s,m)=>s+(m.total||0),0)};
+}
+function fcExistente(d) { return D.movimentacoes.find(m=>m.tipo==='fechamento'&&!m.exc&&dOf(m)===d); }
+function fcCarregar() {
+  const d=document.getElementById('fcData').value||hoje();
+  const f=fcExistente(d);
+  document.getElementById('fcDin').value=f?String(f.din||0).replace('.',','):'';
+  document.getElementById('fcPix').value=f?String(f.pix||0).replace('.',','):'';
+  fcInfo();
+}
+function fcInfo() {
+  const el=document.getElementById('fcInfoDiv'); if(!el) return;
+  const d=document.getElementById('fcData').value||hoje();
+  const e=fcEntradasDia(d);
+  const esp=r2(e.totV+e.totF);
+  const din=parseMoeda(document.getElementById('fcDin').value), pix=parseMoeda(document.getElementById('fcPix').value);
+  const inf=r2(din+pix), dif=r2(inf-esp);
+  const f=fcExistente(d);
+  el.innerHTML=`Vendas do dia: <strong>${rs(e.totV)}</strong> (${e.vd.length})`+
+    (e.fr.length?` &nbsp;|&nbsp; Fiados recebidos: <strong>${rs(e.totF)}</strong> (${e.fr.length})`:'')+
+    ` &nbsp;|&nbsp; Total a fechar: <strong>${rs(esp)}</strong><br>`+
+    `Informado: <strong>${rs(inf)}</strong> &nbsp;|&nbsp; Diferença: <strong style="color:${Math.abs(dif)<0.005?'#27ae60':'#e74c3c'}">${rs(dif)}</strong>`+
+    (f?`<br><span style="color:#b8860b">Caixa deste dia já fechado — salvar substitui o fechamento anterior.</span>`:'');
+}
+function lancarFechamento() {
+  const d=document.getElementById('fcData').value||hoje();
+  const din=r2(parseMoeda(document.getElementById('fcDin').value));
+  const pix=r2(parseMoeda(document.getElementById('fcPix').value));
+  if(din<0||pix<0||(din+pix)<=0){toast('Informe os valores em dinheiro e PIX!','erro');return;}
+  const e=fcEntradasDia(d);
+  const desc=`Fechamento ${fmtData(d)} — Dinheiro ${rs(din)} / PIX ${rs(pix)}`;
+  const f=fcExistente(d);
+  if(f){Object.assign(f,{din,pix,valor:r2(din+pix),esperado:r2(e.totV+e.totF),desc,dataAlt:new Date().toISOString()});}
+  else D.movimentacoes.push({id:nid(),tipo:'fechamento',data:new Date().toISOString(),dr:d,din,pix,valor:r2(din+pix),esperado:r2(e.totV+e.totF),desc});
+  save(); toast('🧾 Caixa fechado!');
+  renderCaixa();
 }
 
 function filtCaixaHoje(){const h=hoje();document.getElementById('filtCaixaDe').value=h;document.getElementById('filtCaixaAte').value=h;renderCaixa();}
@@ -1041,23 +1088,28 @@ let fiadoSel=null;
 function renderFiados() {
   const lista=D.movimentacoes.filter(m=>m.tipo==='fiado'&&!m.recebido&&!m.exc);
   document.getElementById('tbFiados').innerHTML=lista.map(m=>`<tr>
-    <td>${m.dr||m.data.split('T')[0]}</td><td>${m.cli||'—'}</td><td>${m.pNome}</td>
-    <td>${m.qtd} ${m.un}</td><td>${rs(m.total)}</td>
+    <td>${fmtData(dOf(m))}</td><td>${m.cli||'—'}</td><td>${m.pNome}</td>
+    <td>${fmtQtdMov(m)}</td><td>${rs(m.total)}</td>
     <td><button class="btn btn-success" style="font-size:.8rem;padding:4px 10px" onclick="abrirFiado(${m.id})">✅ Receber</button></td></tr>`).join('')||
     '<tr><td colspan="6" style="text-align:center;color:#aaa">Nenhum fiado pendente</td></tr>';
+  const rec=D.movimentacoes.filter(m=>m.tipo==='fiado'&&m.recebido&&!m.exc).sort((a,b)=>(b.drRec||'').localeCompare(a.drRec||'')).slice(0,30);
+  document.getElementById('tbFiadosRec').innerHTML=rec.map(m=>`<tr>
+    <td>${fmtData(dOf(m))}</td><td>${fmtData(m.drRec)}</td><td>${m.cli||'—'}</td><td>${m.pNome}</td><td>${rs(m.total)}</td></tr>`).join('')||
+    '<tr><td colspan="5" style="text-align:center;color:#aaa">Nenhum fiado recebido</td></tr>';
 }
 function abrirFiado(id) {
   fiadoSel=id;
   const m=D.movimentacoes.find(x=>x.id===id);
   document.getElementById('infoFiado').textContent=`${m.cli||'Cliente'} — ${m.pNome} — ${rs(m.total)}`;
+  document.getElementById('fiadoData').value=hoje();
   document.getElementById('modalFiado').classList.add('open');
 }
 function fecharFiado() { document.getElementById('modalFiado').classList.remove('open'); fiadoSel=null; }
 function confirmarFiado() {
-  const pgto=gpgto('pgFiado');
-  if(!pgto){toast('Selecione o pagamento!','erro');return;}
+  const d=document.getElementById('fiadoData').value;
+  if(!d){toast('Informe a data do recebimento!','erro');return;}
   const m=D.movimentacoes.find(x=>x.id===fiadoSel);
-  if(m){m.recebido=true;m.pgto=pgto;m.drRec=hoje();}
+  if(m){m.recebido=true;m.drRec=d;}
   save(); toast('✅ Fiado recebido!'); fecharFiado(); renderFiados();
 }
 
@@ -1226,19 +1278,18 @@ function renderHist() {
     if(hAte&&d>hAte)return false;
     return true;
   }).reverse();
-  const badges={venda:'badge-venda',fiado:'badge-fiado',producao:'badge-producao',transferencia:'badge-transferencia',retirada:'badge-retirada',despesa:'badge-despesa',retiradaCaixa:'badge-caixa',deposito:'badge-venda',retornoLeite:'badge-transferencia'};
-  const labels={venda:'Venda',fiado:'Fiado',producao:'Produção',transferencia:'Transferência',retirada:'Retirada',despesa:'Despesa',retiradaCaixa:'Ret.Caixa',deposito:'Depósito',ajusteEstoque:'Ajuste Est.',retornoLeite:'Ret.Leite'};
+  const badges={venda:'badge-venda',fiado:'badge-fiado',producao:'badge-producao',transferencia:'badge-transferencia',retirada:'badge-retirada',despesa:'badge-despesa',retiradaCaixa:'badge-caixa',deposito:'badge-venda',retornoLeite:'badge-transferencia',fechamento:'badge-fechamento',ajusteEstoque:'badge-ajusteEstoque'};
+  const labels={venda:'Venda',fiado:'Fiado',producao:'Produção',transferencia:'Transferência',retirada:'Retirada',despesa:'Despesa',retiradaCaixa:'Ret.Caixa',deposito:'Depósito',ajusteEstoque:'Ajuste Est.',retornoLeite:'Ret.Leite',fechamento:'Fechamento'};
   document.getElementById('tbHist').innerHTML=lista.map(m=>{
     const badge=m.exc?`<span class="badge" style="background:#f1f5f9;color:#94a3b8">Excluído</span>`:`<span class="badge ${badges[m.tipo]||''}">${labels[m.tipo]||m.tipo}</span>`;
     const desc=m.pNome||m.desc||m.motivo||'—';
-    const isQH=(m.pNome||'').toLowerCase().includes('queijo');
-    const qtd=m.qtd?(isQH&&m.qtdUn?`${m.qtd} kg (${m.qtdUn} un)`:`${m.qtd} ${m.un||''}`):'—';
+    const qtd=fmtQtdMov(m);
     const valor=m.total?rs(m.total):m.valor?rs(m.valor):'—';
     const obs=m.cli||m.lote||m.benef||m.obs||m.cat||'—';
     const canEdit=!m.exc&&(m.tipo==='venda'||m.tipo==='fiado');
     const btn=!m.exc?`${canEdit?`<button class="btn btn-warning" style="padding:4px 8px;font-size:.8rem;margin-right:4px" onclick="abrirEditVenda(${m.id})">✏️</button>`:''}<button class="btn btn-danger" onclick="abrirExc(${m.id})">🗑️</button>`:'';
     return `<tr class="${m.exc?'row-exc':''}">
-      <td>${fmtDH(m.data)}</td><td>${badge}</td><td>${desc}</td>
+      <td>${fmtData(dOf(m))}${dOf(m)===String(m.data||'').split('T')[0]?' '+fmtH(m.data):''}</td><td>${badge}</td><td>${desc}</td>
       <td>${qtd}</td><td>${valor}</td><td>${m.pgto||'—'}</td><td>${obs}</td><td>${btn}</td></tr>`;
   }).join('')||'<tr><td colspan="8" style="text-align:center;color:#aaa">Sem registros</td></tr>';
   document.getElementById('resHist').textContent=`${lista.length} registro(s)`;
@@ -1248,6 +1299,20 @@ function renderHist() {
   const fiadosFilt=lista.filter(m=>m.tipo==='fiado'&&!m.exc);
   const fatTotal=vendasFilt.reduce((s,m)=>s+(m.total||0),0)+fiadosFilt.reduce((s,m)=>s+(m.total||0),0);
   const qtdTotal=lista.filter(m=>m.qtd&&!m.exc).reduce((s,m)=>s+(parseFloat(m.qtd)||0),0);
+  // Vendido (vendas + fiados) — unidades e quilos
+  const vendidos=[...vendasFilt,...fiadosFilt];
+  let un=0,kg=0,temKg=false,temUn=false;
+  vendidos.forEach(m=>{
+    if((m.un||'').toLowerCase()==='kg'){kg+=parseFloat(m.qtd)||0;temKg=true;if(m.qtdUn){un+=m.qtdUn;temUn=true;}}
+    else {un+=parseFloat(m.qtd)||0;temUn=true;}
+  });
+  const pF=hProd?prod(hProd):null;
+  const partes=[];
+  if(vendidos.length){
+    if(temUn||pF) partes.push(`Unidades vendidas: ${Math.round(un*1000)/1000} un`);
+    if(temKg) partes.push(`Quilos vendidos: ${fmtKg(kg)} kg`);
+  }
+  document.getElementById('totalHistVend').textContent=partes.length?(pF?pF.nome+' — ':'')+partes.join(' | '):'';
   if(lista.length>0){
     totalDiv.style.display='block';
     document.getElementById('totalHistValor').textContent=fatTotal>0?'Total vendas: '+rs(fatTotal):'';
@@ -1267,7 +1332,7 @@ function confirmarExc() {
     m.exc=true; m.motivoExc=motivo;
     const p=m.pId?prod(m.pId):null;
     if(p){
-      if(m.tipo==='venda'||m.tipo==='fiado') p.loja=(p.loja||0)+(m.qtd||0);
+      if(m.tipo==='venda'||m.tipo==='fiado'){p.loja=r3((p.loja||0)+(m.qtd||0));if(m.qtdUn)p.lojaUn=(p.lojaUn||0)+m.qtdUn;}
       else if(m.tipo==='producao') p.fab=Math.max(0,(p.fab||0)-(m.qtd||0));
       else if(m.tipo==='retirada'){const c=m.ori==='fabrica'?'fab':'loja';p[c]=(p[c]||0)+(m.qtd||0);}
       else if(m.tipo==='transferencia'){p.fab=(p.fab||0)+(m.qtd||0);p.loja=Math.max(0,(p.loja||0)-(m.qtd||0));}
@@ -1278,6 +1343,8 @@ function confirmarExc() {
   if(pgAtiva==='pg-historico') renderHist();
   else if(pgAtiva==='pg-venda') renderVendas();
   else if(pgAtiva==='pg-caixa') renderCaixa();
+  else if(pgAtiva==='pg-transferencia') renderTransf();
+  else if(pgAtiva==='pg-retirada') renderRet();
 }
 
 // =================== RELATÓRIO ===================
@@ -1295,7 +1362,8 @@ function renderRel() {
   const pref=`${ano}-${mes}`;
   let mv=D.movimentacoes.filter(m=>{const d=m.dr||m.data.split('T')[0];return d.startsWith(pref)&&!m.exc;});
   if(dia){const dd=String(parseInt(dia)).padStart(2,'0');mv=mv.filter(m=>(m.dr||m.data.split('T')[0]).endsWith('-'+dd));}
-  const vd=mv.filter(m=>m.tipo==='venda'),fd=mv.filter(m=>m.tipo==='fiado'&&m.recebido);
+  const vd=mv.filter(m=>m.tipo==='venda');
+  const fd=D.movimentacoes.filter(m=>{if(m.exc||m.tipo!=='fiado'||!m.recebido)return false;const d=m.drRec||dOf(m);if(!d.startsWith(pref))return false;return !dia||d.endsWith('-'+String(parseInt(dia)).padStart(2,'0'));});
   const dep=mv.filter(m=>m.tipo==='despesa');
   const fatV=vd.reduce((s,m)=>s+(m.total||0),0);
   const fatF=fd.reduce((s,m)=>s+(m.total||0),0);
@@ -1456,66 +1524,98 @@ function exportarTabelaLeite(){
 }
 
 // =================== EDITAR VENDA ===================
+function editVModo() {
+  const p=prod(document.getElementById('editVProd').value);
+  const kg=isKg(p), q=isQueijo(p);
+  document.getElementById('editVValorGrp').style.display=kg?'':'none';
+  document.getElementById('editVDescGrp').style.display=kg?'none':'';
+  document.getElementById('editVQtdUnGrp').style.display=q?'':'none';
+  document.getElementById('editVUnitLabel').textContent=kg?'Valor do kg R$':'Valor Unit. R$';
+  document.getElementById('editVQtdLabel').textContent=kg?'Quilos':'Quantidade';
+  document.getElementById('editVQtd').readOnly=kg;
+  return {p,kg,q};
+}
 function abrirEditVenda(id){
   const m=D.movimentacoes.find(x=>x.id===id); if(!m)return;
   document.getElementById('editVendaId').value=id;
-  document.getElementById('editVQtd').value=m.qtd||0;
+  const sel=document.getElementById('editVProd');
+  sel.innerHTML=D.produtos.map(p=>`<option value="${p.id}">${p.nome} (${p.un})</option>`).join('');
+  if(m.pId!=null&&!prod(m.pId)) sel.innerHTML=`<option value="${m.pId}">${m.pNome} (removido)</option>`+sel.innerHTML;
+  sel.value=m.pId!=null?String(m.pId):'';
   document.getElementById('editVUnit').value=m.unit||0;
+  document.getElementById('editVQtd').value=m.qtd||0;
+  document.getElementById('editVValor').value=m.total||0;
+  document.getElementById('editVQtdUn').value=m.qtdUn||'';
   document.getElementById('editVDesc').value=m.desc||0;
   document.getElementById('editVCli').value=m.cli||'';
-  document.getElementById('editVData').value=m.dr||m.data.split('T')[0];
-  document.querySelectorAll('#pgEditV .pgto-btn').forEach(b=>b.classList.remove('sel'));
-  const pgtoBtn=document.querySelector(`#pgEditV [data-val="${m.pgto}"]`);
-  if(pgtoBtn)pgtoBtn.classList.add('sel');
-  const med=document.getElementById('mistoEditDetail');
-  if(med){
-    med.style.display=m.pgto==='Misto'?'block':'none';
-    if(m.pgto==='Misto'){
-      const e1=document.getElementById('eMPgto1'),v1=document.getElementById('eMValor1');
-      const e2=document.getElementById('eMPgto2'),v2=document.getElementById('eMValor2');
-      if(e1)e1.value=m.pgto1||'Dinheiro';
-      if(v1)v1.value=m.pgto1Valor?String(m.pgto1Valor).replace('.',','):'';
-      if(e2)e2.value=m.pgto2||'';
-      if(v2)v2.value=m.pgto2Valor?String(m.pgto2Valor).replace('.',','):'';
-    }
-  }
+  document.getElementById('editVData').value=dOf(m);
+  document.querySelectorAll('#pgEditV .pgto-btn').forEach(b=>b.classList.toggle('sel',b.dataset.val===(m.tipo==='fiado'?'Fiado':'Venda')));
+  editVModo();
   editVPreview();
   document.getElementById('modalEditVenda').classList.add('open');
 }
+function editVInfoProd(){
+  const {p,kg,q}=editVModo();
+  if(p&&p.preco) document.getElementById('editVUnit').value=p.preco;
+  if(kg) document.getElementById('editVDesc').value='0';
+  if(!q) document.getElementById('editVQtdUn').value='';
+  editVPreview();
+}
 function fecharEditVenda(){document.getElementById('modalEditVenda').classList.remove('open');}
-function editVPreview(){
-  const qtd=parseFloat(document.getElementById('editVQtd').value)||0;
+function editVCalc(){
+  const p=prod(document.getElementById('editVProd').value);
+  const kg=isKg(p);
   const unit=parseFloat(document.getElementById('editVUnit').value)||0;
-  const desc=parseFloat(document.getElementById('editVDesc').value)||0;
-  const tot=Math.max(0,qtd*unit-desc);
+  let qtd,total,desc=0;
+  if(kg){
+    total=r2(document.getElementById('editVValor').value);
+    qtd=unit>0?r3(total/unit):0;
+    document.getElementById('editVQtd').value=qtd>0?qtd:'';
+  } else {
+    qtd=parseFloat(document.getElementById('editVQtd').value)||0;
+    desc=parseFloat(document.getElementById('editVDesc').value)||0;
+    total=r2(Math.max(0,qtd*unit-desc));
+  }
+  return {p,kg,unit,qtd,total,desc};
+}
+function editVPreview(){
+  const c=editVCalc();
   const div=document.getElementById('editVPreviewDiv');
-  div.style.display=qtd>0&&unit>0?'block':'none';
-  div.querySelector('strong').textContent=rs(tot);
+  div.style.display=c.qtd>0&&c.unit>0?'block':'none';
+  div.innerHTML=(c.kg?`Quilos: <strong style="color:#1a3a5c">${fmtKg(c.qtd)} kg</strong> &nbsp;|&nbsp; `:'')+`Total: <strong style="color:#27ae60">${rs(c.total)}</strong>`;
 }
 function salvarEditVenda(){
   try{
     const id=parseInt(document.getElementById('editVendaId').value);
     const m=D.movimentacoes.find(x=>x.id===id); if(!m){toast('Não encontrado','erro');return;}
-    const qtdNova=parseFloat(document.getElementById('editVQtd').value)||0;
-    const unitNova=parseFloat(document.getElementById('editVUnit').value)||0;
-    const descNova=parseFloat(document.getElementById('editVDesc').value)||0;
-    const pgtoNovo=gpgto('pgEditV')||m.pgto;
-    const cliNovo=document.getElementById('editVCli').value.trim();
-    const dataNova=document.getElementById('editVData').value||m.dr;
-    const p=m.pId?prod(m.pId):null;
-    if(p){const diff=qtdNova-(m.qtd||0);p.loja=Math.max(0,Math.round(((p.loja||0)-diff)*1000)/1000);}
-    m.qtd=qtdNova;m.unit=unitNova;m.desc=descNova;
-    m.total=Math.max(0,qtdNova*unitNova-descNova);
-    m.pgto=pgtoNovo;m.cli=cliNovo;m.dr=dataNova;
-    m.tipo=pgtoNovo==='Fiado'?'fiado':'venda';
-    if(pgtoNovo==='Misto'){
-      m.pgto1=document.getElementById('eMPgto1').value;
-      m.pgto1Valor=parseMoeda(document.getElementById('eMValor1').value);
-      const ep2=document.getElementById('eMPgto2').value;
-      if(ep2){m.pgto2=ep2;m.pgto2Valor=parseMoeda(document.getElementById('eMValor2').value);}
-      else{delete m.pgto2;delete m.pgto2Valor;}
-    } else {delete m.pgto1;delete m.pgto1Valor;delete m.pgto2;delete m.pgto2Valor;}
-    save(); toast('✅ Venda atualizada!'); fecharEditVenda(); renderVendas(); renderHist(); renderCaixa();
+    const c=editVCalc();
+    const pNovo=c.p;
+    if(!pNovo){toast('Selecione um produto!','erro');return;}
+    if(!c.qtd||c.qtd<=0){toast('Informe a quantidade!','erro');return;}
+    const qtdUnNova=isQueijo(pNovo)?(parseInt(document.getElementById('editVQtdUn').value)||0):0;
+    const tipoNovo=(gpgto('pgEditV')||'Venda')==='Fiado'?'fiado':'venda';
+    // estorna estoque do lançamento original e baixa o novo
+    const pOld=m.pId!=null?prod(m.pId):null;
+    if(pOld){
+      pOld.loja=r3((parseFloat(pOld.loja)||0)+(m.qtd||0));
+      if(m.qtdUn) pOld.lojaUn=(pOld.lojaUn||0)+m.qtdUn;
+    }
+    pNovo.loja=Math.max(0,r3((parseFloat(pNovo.loja)||0)-c.qtd));
+    if(qtdUnNova) pNovo.lojaUn=Math.max(0,(pNovo.lojaUn||0)-qtdUnNova);
+    m.pId=pNovo.id; m.pNome=pNovo.nome; m.un=pNovo.un;
+    m.qtd=c.qtd; m.unit=c.unit; m.desc=c.desc; m.total=c.total;
+    if(qtdUnNova) m.qtdUn=qtdUnNova; else delete m.qtdUn;
+    m.cli=document.getElementById('editVCli').value.trim();
+    m.dr=document.getElementById('editVData').value||m.dr;
+    if(tipoNovo!==m.tipo){
+      if(tipoNovo==='fiado'){m.pgto='Fiado';delete m.recebido;delete m.drRec;}
+      else {m.pgto='';delete m.recebido;delete m.drRec;}
+      delete m.pgto1;delete m.pgto1Valor;delete m.pgto2;delete m.pgto2Valor;
+      m.tipo=tipoNovo;
+    }
+    save(); toast('✅ Venda atualizada!'); fecharEditVenda();
+    const pg=(document.querySelector('.page.active')||{}).id||'';
+    if(pg==='pg-historico') renderHist(); else if(pg==='pg-venda') renderVendas(); else if(pg==='pg-caixa') renderCaixa();
   }catch(e){toast('Erro: '+e.message,'erro');}
 }
 
@@ -1567,6 +1667,8 @@ setTimeout(()=>{
             else if(pg==='pg-historico') renderHist();
             else if(pg==='pg-relatorio') renderRel();
             else if(pg==='pg-fiado') renderFiados();
+            else if(pg==='pg-transferencia') renderTransf();
+            else if(pg==='pg-retirada') renderRet();
             document.getElementById('statusFb').textContent='✅ Sincronizado';
           } else {
             if(localQtd>=fbQtd) db.ref('ltbv2').set(D).catch(()=>{});
@@ -1663,47 +1765,24 @@ setTimeout(()=>{
     <h3>✏️ Editar Venda</h3>
     <input type="hidden" id="editVendaId">
     <div class="form-row">
-      <div class="form-group" style="max-width:130px"><label>Quantidade</label><input type="number" id="editVQtd" step="0.001" oninput="editVPreview()"></div>
-      <div class="form-group" style="max-width:130px"><label>Valor Unit. R$</label><input type="number" id="editVUnit" step="0.01" oninput="editVPreview()"></div>
-      <div class="form-group" style="max-width:110px"><label>Desconto R$</label><input type="number" id="editVDesc" step="0.01" value="0" oninput="editVPreview()"></div>
+      <div class="form-group" style="min-width:100%"><label>Produto</label><select id="editVProd" onchange="editVInfoProd()"></select></div>
     </div>
-    <div id="editVPreviewDiv" style="background:#f0f4f8;border-radius:8px;padding:8px;margin-bottom:8px;display:none">Total: <strong style="color:#27ae60"></strong></div>
+    <div class="form-row">
+      <div class="form-group" style="max-width:130px"><label id="editVUnitLabel">Valor Unit. R$</label><input type="number" id="editVUnit" step="0.01" oninput="editVPreview()"></div>
+      <div class="form-group" style="max-width:140px;display:none" id="editVValorGrp"><label>Valor Recebido R$</label><input type="number" id="editVValor" step="0.01" oninput="editVPreview()"></div>
+      <div class="form-group" style="max-width:130px"><label id="editVQtdLabel">Quantidade</label><input type="number" id="editVQtd" step="0.001" oninput="editVPreview()"></div>
+      <div class="form-group" style="max-width:100px;display:none" id="editVQtdUnGrp"><label>Peças</label><input type="number" id="editVQtdUn" step="1" min="0"></div>
+      <div class="form-group" style="max-width:110px" id="editVDescGrp"><label>Desconto R$</label><input type="number" id="editVDesc" step="0.01" value="0" oninput="editVPreview()"></div>
+    </div>
+    <div id="editVPreviewDiv" style="background:#f0f4f8;border-radius:8px;padding:8px;margin-bottom:8px;display:none"></div>
     <div class="form-row">
       <div class="form-group"><label>Cliente</label><input type="text" id="editVCli"></div>
       <div class="form-group" style="max-width:150px"><label>Data da Venda</label><input type="date" id="editVData"></div>
     </div>
-    <div class="form-group" style="margin-bottom:12px"><label>Pagamento</label>
+    <div class="form-group" style="margin-bottom:12px"><label>Tipo</label>
       <div class="pgto-btns" id="pgEditV">
-        <button class="pgto-btn" onclick="spgto('pgEditV','À Vista',this)" data-val="À Vista">🤝 À Vista</button>
-        <button class="pgto-btn" onclick="spgto('pgEditV','Dinheiro',this)" data-val="Dinheiro">💵 Dinheiro</button>
-        <button class="pgto-btn" onclick="spgto('pgEditV','PIX',this)" data-val="PIX">📱 PIX</button>
-        <button class="pgto-btn" onclick="spgto('pgEditV','Cartão',this)" data-val="Cartão">💳 Cartão</button>
-        <button class="pgto-btn" onclick="spgto('pgEditV','Misto',this)" data-val="Misto">🔀 Misto</button>
+        <button class="pgto-btn" onclick="spgto('pgEditV','Venda',this)" data-val="Venda">🛒 Venda</button>
         <button class="pgto-btn" onclick="spgto('pgEditV','Fiado',this)" data-val="Fiado">📝 Fiado</button>
-      </div>
-    </div>
-    <div id="mistoEditDetail" style="display:none;background:#f0f4f8;border-radius:8px;padding:10px;margin-bottom:10px">
-      <div style="font-size:.8rem;color:#555;margin-bottom:6px">🔀 Detalhes do pagamento misto:</div>
-      <div class="form-row">
-        <div class="form-group"><label>Forma 1</label>
-          <select id="eMPgto1" style="padding:6px;border-radius:6px;border:1px solid #ccc">
-            <option value="Dinheiro">💵 Dinheiro</option>
-            <option value="PIX">📱 PIX</option>
-            <option value="Cartão">💳 Cartão</option>
-            <option value="À Vista">🤝 À Vista</option>
-          </select>
-        </div>
-        <div class="form-group" style="max-width:120px"><label>Valor R$</label><input type="text" id="eMValor1" placeholder="Ex: 10,00" style="padding:6px;border-radius:6px;border:1px solid #ccc;width:100%"></div>
-        <div class="form-group"><label>Forma 2 (opcional)</label>
-          <select id="eMPgto2" style="padding:6px;border-radius:6px;border:1px solid #ccc">
-            <option value="">— Nenhuma —</option>
-            <option value="Dinheiro">💵 Dinheiro</option>
-            <option value="PIX">📱 PIX</option>
-            <option value="Cartão">💳 Cartão</option>
-            <option value="À Vista">🤝 À Vista</option>
-          </select>
-        </div>
-        <div class="form-group" style="max-width:120px"><label>Valor R$</label><input type="text" id="eMValor2" placeholder="Ex: 5,00" style="padding:6px;border-radius:6px;border:1px solid #ccc;width:100%"></div>
       </div>
     </div>
     <div style="display:flex;gap:8px">
