@@ -1315,20 +1315,33 @@ function renderHist() {
   const fiadosFilt=lista.filter(m=>m.tipo==='fiado'&&!m.exc);
   const fatTotal=vendasFilt.reduce((s,m)=>s+(m.total||0),0)+fiadosFilt.reduce((s,m)=>s+(m.total||0),0);
   const qtdTotal=lista.filter(m=>m.qtd&&!m.exc).reduce((s,m)=>s+(parseFloat(m.qtd)||0),0);
-  // Vendido (vendas + fiados) — unidades e quilos
+  // Vendido (vendas + fiados) — peças (un) e quilos, por produto
   const vendidos=[...vendasFilt,...fiadosFilt];
-  let un=0,kg=0,temKg=false,temUn=false;
+  const grupos={};
   vendidos.forEach(m=>{
-    if((m.un||'').toLowerCase()==='kg'){kg+=parseFloat(m.qtd)||0;temKg=true;if(m.qtdUn){un+=m.qtdUn;temUn=true;}}
-    else {un+=parseFloat(m.qtd)||0;temUn=true;}
+    const pr=prod(m.pId);
+    const nome=m.pNome||(pr&&pr.nome)||'Produto';
+    const ehQueijo=isQueijo(pr)||nome.toLowerCase().includes('queijo')||(m.un||'').toLowerCase()==='kg';
+    const g=grupos[nome]||(grupos[nome]={queijo:ehQueijo,un:0,kg:0,semPecas:0});
+    if(ehQueijo){
+      g.kg+=parseFloat(m.qtd)||0;
+      if(m.qtdUn)g.un+=parseInt(m.qtdUn)||0; else g.semPecas++;
+    } else {
+      g.un+=parseFloat(m.qtd)||0;
+    }
   });
-  const pF=hProd?prod(hProd):null;
-  const partes=[];
-  if(vendidos.length){
-    if(temUn||pF) partes.push(`Unidades vendidas: ${Math.round(un*1000)/1000} un`);
-    if(temKg) partes.push(`Quilos vendidos: ${fmtKg(kg)} kg`);
-  }
-  document.getElementById('totalHistVend').textContent=partes.length?(pF?pF.nome+' — ':'')+partes.join(' | '):'';
+  const linhas=Object.keys(grupos).map(nome=>{
+    const g=grupos[nome];
+    let t=(g.queijo?'🧀 ':'')+nome+' — ';
+    if(g.queijo){
+      t+='Peças vendidas: '+g.un+' un | Quilos vendidos: '+fmtKg(g.kg)+' kg';
+      if(g.semPecas)t+=' <span style="color:#c0392b;font-weight:400;font-size:.8rem">('+g.semPecas+' venda(s) sem nº de peças)</span>';
+    } else {
+      t+='Unidades vendidas: '+(Math.round(g.un*1000)/1000)+' un';
+    }
+    return '<div>'+t+'</div>';
+  });
+  document.getElementById('totalHistVend').innerHTML=linhas.join('');
   if(lista.length>0){
     totalDiv.style.display='block';
     document.getElementById('totalHistValor').textContent=fatTotal>0?'Total vendas: '+rs(fatTotal):'';
