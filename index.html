@@ -162,7 +162,9 @@ input[readonly]{background:#f0f4f8;color:#1a3a5c;font-weight:700}
       </div>
     </div>
     <div id="prevVenda" style="background:#f0f4f8;border-radius:8px;padding:10px;margin:10px 0;display:none"></div>
+    <div id="carrinhoVenda" style="display:none;border:1px solid #cfd8e3;border-radius:8px;padding:10px;margin:10px 0;background:#fff"></div>
     <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-primary" style="background:#2563a8;color:#fff" onclick="vAddItem()">➕ Adicionar item</button>
       <button class="btn btn-success" onclick="lancarVenda()">✅ Lançar Venda</button>
       <button class="btn btn-secondary" onclick="limparVenda()">Limpar</button>
     </div>
@@ -809,32 +811,87 @@ function vPreview() {
   el.innerHTML=(c.kg?`Quilos: <strong style="color:#1a3a5c;font-size:1.1rem">${fmtKg(c.qtd)} kg</strong> &nbsp;|&nbsp; `:'')+
     `Total: <strong style="color:#27ae60;font-size:1.1rem">${rs(c.total)}</strong>${pecas}`;
 }
+let vCarrinho=[];
+function vLerItem() {
+  const pId=document.getElementById('vProd').value;
+  if(!pId){toast('Selecione um produto!','erro');return null;}
+  const c=vCalc(), p=c.p;
+  if(!p){toast('Produto não encontrado!','erro');return null;}
+  if(!c.unit||c.unit<=0){toast(c.kg?'Informe o valor do kg!':'Informe o valor unitário!','erro');return null;}
+  if(c.kg&&(!c.total||c.total<=0)){toast('Informe o valor recebido!','erro');return null;}
+  if(!c.qtd||c.qtd<=0){toast('Informe a quantidade!','erro');return null;}
+  const qtdUn=parseInt(document.getElementById('vQtdUn').value)||0;
+  const jaNoCarrinho=vCarrinho.filter(i=>String(i.pId)===String(p.id)).reduce((t,i)=>t+i.qtd,0);
+  const loja=parseFloat(p.loja)||0;
+  if(loja<r3(jaNoCarrinho+c.qtd)){toast('Estoque da Loja insuficiente! Disponível: '+r3(loja-jaNoCarrinho)+' '+p.un,'erro');return null;}
+  return {pId:p.id,pNome:p.nome,un:p.un,qtd:c.qtd,unit:c.unit,desc:c.desc,total:c.total,qtdUn:(isQueijo(p)&&qtdUn>0)?qtdUn:0};
+}
+function vLimparItem() {
+  ['vProd','vQtd','vUnit','vValor','vQtdUn'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('vDesc').value='0';
+  document.getElementById('prevVenda').style.display='none';
+  document.getElementById('vEstoqueInfo').textContent='';
+  document.getElementById('vValorGrp').style.display='none';
+  document.getElementById('vQtdUnGrp').style.display='none';
+  document.getElementById('vDescGrp').style.display='';
+  document.getElementById('vUnitLabel').textContent='Valor Unit. R$';
+  document.getElementById('vQtdLabel').textContent='Quantidade';
+  document.getElementById('vQtd').readOnly=false;
+}
+function vRenderCarrinho() {
+  const el=document.getElementById('carrinhoVenda');
+  if(!vCarrinho.length){el.style.display='none';el.innerHTML='';return;}
+  const tot=vCarrinho.reduce((t,i)=>t+i.total,0);
+  el.style.display='block';
+  el.innerHTML='<div style="font-weight:700;color:#1a3a5c;margin-bottom:6px">🧺 Itens desta venda ('+vCarrinho.length+')</div>'+
+    '<table style="width:100%"><tbody>'+vCarrinho.map((i,n)=>
+      '<tr><td>'+i.pNome+'</td><td>'+fmtQtdMov(i)+'</td><td style="text-align:right">'+rs(i.total)+'</td>'+
+      '<td style="width:40px;text-align:right"><button class="btn btn-danger" style="padding:2px 8px" onclick="vRemoverItem('+n+')">✖</button></td></tr>').join('')+
+    '</tbody></table>'+
+    '<div style="text-align:right;margin-top:6px;font-size:1.05rem">Total da venda: <strong style="color:#27ae60">'+rs(tot)+'</strong></div>';
+}
+function vRemoverItem(n) { vCarrinho.splice(n,1); vRenderCarrinho(); }
+function vAddItem() {
+  const it=vLerItem(); if(!it) return;
+  vCarrinho.push(it);
+  vLimparItem();
+  vRenderCarrinho();
+  toast('➕ Item adicionado! Escolha o próximo ou clique em Lançar Venda.');
+}
 function lancarVenda() {
   try {
-    const pId=document.getElementById('vProd').value;
-    if(!pId){toast('Selecione um produto!','erro');return;}
-    const c=vCalc(), p=c.p;
-    if(!p){toast('Produto não encontrado!','erro');return;}
-    if(!c.unit||c.unit<=0){toast(c.kg?'Informe o valor do kg!':'Informe o valor unitário!','erro');return;}
-    if(c.kg&&(!c.total||c.total<=0)){toast('Informe o valor recebido!','erro');return;}
-    if(!c.qtd||c.qtd<=0){toast('Informe a quantidade!','erro');return;}
+    // se ainda há um produto preenchido no formulário, entra como último item
+    if(document.getElementById('vProd').value){
+      const it=vLerItem(); if(!it) return;
+      vCarrinho.push(it);
+    }
+    if(!vCarrinho.length){toast('Selecione um produto!','erro');return;}
+    // confere estoque total por produto
+    const somas={};
+    vCarrinho.forEach(i=>{somas[i.pId]=r3((somas[i.pId]||0)+i.qtd);});
+    for(const id in somas){
+      const pr=prod(id);
+      if(!pr||(parseFloat(pr.loja)||0)<somas[id]){toast('Estoque da Loja insuficiente para '+(pr?pr.nome:'produto')+'!','erro');vRenderCarrinho();return;}
+    }
     const tipoSel=gpgto('pgV')||'Venda';
     const cli=document.getElementById('vCliente').value.trim();
     const obs=document.getElementById('vObs').value.trim();
     const vData=document.getElementById('vData').value||hoje();
-    const qtdUn=parseInt(document.getElementById('vQtdUn').value)||0;
-    p.loja=parseFloat(p.loja)||0;
-    if(p.loja<c.qtd){toast('Estoque da Loja insuficiente! Disponível: '+p.loja+' '+p.un,'erro');return;}
     const tipo=tipoSel==='Fiado'?'fiado':'venda';
     if(!D.movimentacoes) D.movimentacoes=[];
-    const mov={id:nid(),tipo,data:new Date().toISOString(),dr:vData,
-      pId:p.id,pNome:p.nome,un:p.un,qtd:c.qtd,unit:c.unit,desc:c.desc,total:c.total,pgto:tipo==='fiado'?'Fiado':'',cli,obs};
-    if(isQueijo(p)&&qtdUn>0) mov.qtdUn=qtdUn;
-    D.movimentacoes.push(mov);
-    p.loja=r3(p.loja-c.qtd);
-    if(isQueijo(p)&&qtdUn>0) p.lojaUn=Math.max(0,(p.lojaUn||0)-qtdUn);
+    const agora=new Date().toISOString();
+    vCarrinho.forEach(i=>{
+      const pr=prod(i.pId);
+      const mov={id:nid(),tipo,data:agora,dr:vData,
+        pId:i.pId,pNome:i.pNome,un:i.un,qtd:i.qtd,unit:i.unit,desc:i.desc,total:i.total,pgto:tipo==='fiado'?'Fiado':'',cli,obs};
+      if(i.qtdUn>0) mov.qtdUn=i.qtdUn;
+      D.movimentacoes.push(mov);
+      pr.loja=r3((parseFloat(pr.loja)||0)-i.qtd);
+      if(i.qtdUn>0) pr.lojaUn=Math.max(0,(pr.lojaUn||0)-i.qtdUn);
+    });
+    const n=vCarrinho.length;
     save();
-    toast(tipo==='fiado'?'📝 Fiado registrado!':'✅ Venda lançada!');
+    toast((tipo==='fiado'?'📝 Fiado registrado':'✅ Venda lançada')+(n>1?' ('+n+' itens)!':'!'));
     limparVenda();
     renderVendas();
   } catch(e) {
@@ -843,17 +900,11 @@ function lancarVenda() {
   }
 }
 function limparVenda() {
-  ['vProd','vQtd','vUnit','vValor','vQtdUn','vCliente','vObs','vData'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('vDesc').value='0';
-  document.getElementById('prevVenda').style.display='none';
-  document.getElementById('vEstoqueInfo').textContent='';
+  vCarrinho=[];
+  vRenderCarrinho();
+  vLimparItem();
+  ['vCliente','vObs','vData'].forEach(id=>document.getElementById(id).value='');
   document.querySelectorAll('#pgV .pgto-btn').forEach(b=>b.classList.toggle('sel',b.dataset.val==='Venda'));
-  document.getElementById('vValorGrp').style.display='none';
-  document.getElementById('vQtdUnGrp').style.display='none';
-  document.getElementById('vDescGrp').style.display='';
-  document.getElementById('vUnitLabel').textContent='Valor Unit. R$';
-  document.getElementById('vQtdLabel').textContent='Quantidade';
-  document.getElementById('vQtd').readOnly=false;
 }
 function fmtQtdMov(m) {
   if(!m.qtd) return '—';
